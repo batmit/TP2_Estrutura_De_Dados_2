@@ -31,7 +31,7 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
 
     if(atoi(argv[1]) == 1){//Intercalação Balanceada de 2f caminhos
         inicio = clock();
-        //IntercalacaoBalanceada();
+        IntercalacaoBalanceada();
         fim = clock();
     }
     else if(atoi(argv[1]) == 2){//Intercalação Balanceada de 2f caminhos com substituição por seleção
