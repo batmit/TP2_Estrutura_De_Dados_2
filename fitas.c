@@ -75,4 +75,5 @@ int ChamarCriadorFitas() {
     printf("Fitas criadas com sucesso dentro da pasta fitas.\n");
 
     fecharFitas(entrada, saida);
+    return 0;
 }

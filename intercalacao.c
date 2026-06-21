@@ -460,3 +460,63 @@ void trimFim(char* str) {
         i--;
     }
 }
+
+// Funções que faltam
+// Conta quantos registros na área estão ocupados
+// Usamos um número diferente de zero como indicador de lugar ocupado.
+int ObterNumCelOcupadas(Registro* Area) {
+    int count = 0;
+    for (int i = 0; i < m; i++)
+        if (Area[i].numero != 0)
+            count++;
+    return count;
+}
+
+// Insere um novo item na area
+void InsereItem(Registro item, Registro* Area) {
+    int n = ObterNumCelOcupadas(Area);
+    int i = n - 1;
+
+    // Encontra a posição correta para inserir e manter a ordem
+    while (i >= 0 && Area[i].nota > item.nota) {
+        Area[i + 1] = Area[i];
+        i--;
+    }
+
+    // Insere o item
+    Area[i + 1] = item;
+}
+
+// Remove o registro com a menor nota
+void RetiraPrimeiro(Registro* Area, Registro* R) {
+    int n = ObterNumCelOcupadas(Area);
+    if (n == 0) return;
+
+    *R = Area[0]; // Elemento mínimo está no começo
+
+    // Move os elementos restantes para a esquerda
+    for (int i = 0; i < n - 1; i++)
+        Area[i] = Area[i + 1];
+
+    // Limpa o último elemento movido
+    Area[n - 1].numero = 0;
+    Area[n - 1].nota = 0.0;
+    strcpy(Area[n - 1].estado, "");
+    strcpy(Area[n - 1].cidade, "");
+    strcpy(Area[n - 1].curso, "");
+}
+
+// Remove o registro com a maior nota
+void RetiraUltimo(Registro* Area, Registro* R) {
+    int n = ObterNumCelOcupadas(Area);
+    if (n == 0) return;
+
+    *R = Area[n - 1]; // Elemento máximo está no fim
+
+    // Limpa o elemento extraído
+    Area[n - 1].numero = 0;
+    Area[n - 1].nota = 0.0;
+    strcpy(Area[n - 1].estado, "");
+    strcpy(Area[n - 1].cidade, "");
+    strcpy(Area[n - 1].curso, "");
+}

@@ -19,7 +19,7 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
 
     clock_t inicio, fim;
 
-    FILE* base = fopen("PROVAO.txt", "r");
+    FILE* base = fopen("PROVAO.TXT", "r");
     if (!base) {
         printf("Erro ao abrir o arquivo.\n");
         return 1;
