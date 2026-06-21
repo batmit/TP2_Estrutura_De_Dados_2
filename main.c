@@ -2,6 +2,8 @@
 #include <stdlib.h>
 
 #include "registro.h"
+#include "intercalacao.h"
+#include "quicksort.h"
 
 int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> [-P]
 
@@ -78,6 +80,6 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
 
     printf("----------------------------\n");
 
-    
+
     return 0;
 }

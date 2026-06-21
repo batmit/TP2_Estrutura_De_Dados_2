@@ -1,9 +1,6 @@
 
 #include<stdio.h>
 #include<stdlib.h>
-#define FITAS_ENTRADA 20
-#define FITAS_SAIDA 20
-#define TOTAL_FITAS 40
 #include "intercalacao.h"
 
 bool criarFitas(FILE* entrada[FITAS_ENTRADA], FILE* saida[FITAS_SAIDA]) {
@@ -66,7 +63,7 @@ void fecharFitas(FILE* entrada[FITAS_ENTRADA], FILE* saida[FITAS_SAIDA]) {
     }
 }
 
-void ChamarCriadorFitas() {
+int ChamarCriadorFitas() {
     FILE* entrada[FITAS_ENTRADA];
     FILE* saida[FITAS_SAIDA];
 

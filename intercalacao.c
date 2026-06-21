@@ -74,11 +74,11 @@ void IntercalacaoBalanceada(){
     int w = 1;
 
     do{
-        
+
         registros[i] = copia;
 
         if(i == 19){
-            
+
             if(w == 21){
                 w = 1;
             }
@@ -238,7 +238,7 @@ void IntercalacaoBalanceada(){
                 fwrite(&curinga, sizeof(Registro), 1, fita);
                 fclose(fita);
 
-                
+
                 //Leio todos mais uma vez
                 for(int i = 0; i < 20; i++){
                     if(fread(&registros[i], sizeof(Registro), 1, ponteirosDeFile[i]) != 1){
@@ -314,7 +314,7 @@ int indiceMenorRegistro(Registro v[], int n, bool ativos[20]) {
 
 
 double calculaP(long n) {
-    int m = 20;
+    // int m = 20; Já é uma constante definida em intercalacao.h
     int f = 20;
 
     if (n <= 0) {

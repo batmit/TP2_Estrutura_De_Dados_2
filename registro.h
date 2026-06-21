@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include <limits.h>
 
-#define m 20//quantidade de registros que cabem na memória principal
+#define m 20 //quantidade de registros que cabem na memória principal
 
 typedef struct registro{
     long numero;
