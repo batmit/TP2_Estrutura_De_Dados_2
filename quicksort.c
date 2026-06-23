@@ -6,8 +6,8 @@ void QuickSortExterno(FILE **Li, FILE **Ei, FILE **LEs, int Esq, int Dir, Dados 
 
     if(Dir - Esq < 1)
         return;
-    
-    FAVazia(&Area);
+
+    FAVazia(Area); // O vetor já é um pointeiro
     Particao(Li, Ei, LEs, Area, Esq, Dir, &i, &j, dados);
 
     if (i - Esq < Dir - j) {

@@ -1,7 +1,8 @@
 #ifndef INTERCALACAO_H
 #define INTERCALACAO_H
-#define FITAS_ENTRADA 20
+// #define FITAS_ENTRADA 20
 #include "registro.h"
+#include "fitas.h"
 #include <math.h>
 
 #ifdef _WIN32
@@ -15,9 +16,9 @@
 void HeapSort(Registro *v, int n);
 void HeapConstroi(Registro *v, int n);
 void HeapRefaz(Registro *v, int l, int r);
-int ChamarCriadorFitas();
-void fecharFitas(FILE* entrada[FITAS_ENTRADA], FILE* saida[FITAS_SAIDA]);
-bool criarFitas(FILE* entrada[FITAS_ENTRADA], FILE* saida[FITAS_SAIDA]);
+// int ChamarCriadorFitas();
+// void fecharFitas(FILE* entrada[FITAS_ENTRADA], FILE* saida[FITAS_SAIDA]);
+// bool criarFitas(FILE* entrada[FITAS_ENTRADA], FILE* saida[FITAS_SAIDA]);
 void abrirFitasSaida(FILE* fitasSaida[FITAS_ENTRADA], int n);
 void abrirFitasEntrada(FILE* fitasEntrada[FITAS_ENTRADA], int n);
 int indiceMenorRegistro(Registro v[], int n, bool ativos[20]);
@@ -30,5 +31,6 @@ void IntercalacaoBalanceada();
 
 void trimFim(char* str);
 
+double calculaP(long n);
 
 #endif

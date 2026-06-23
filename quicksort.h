@@ -13,4 +13,10 @@ void EscreveMin(FILE **ArqEi, Registro R, int *Ei);
 void RetiraMax(Registro* Area, Registro* R, int *NRArea);
 void RetiraMin(Registro* Area, Registro* R, int *NRArea);
 void Particao(FILE **ArqLi, FILE **ArqEi, FILE **ArqLEs, Registro* Area, int Esq, int Dir, int *i, int *j, Dados *dados);
+// Funções que faltam
+int ObterNumCelOcupadas(Registro* Area);
+void InsereItem(Registro item, Registro* Area);
+void RetiraPrimeiro(Registro* Area, Registro* R);
+void RetiraUltimo(Registro* Area, Registro* R);
+
 #endif

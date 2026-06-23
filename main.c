@@ -2,6 +2,8 @@
 #include <stdlib.h>
 
 #include "registro.h"
+#include "intercalacao.h"
+#include "quicksort.h"
 
 int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> [-P]
 
@@ -17,7 +19,7 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
 
     clock_t inicio, fim;
 
-    FILE* base = fopen("PROVAO.txt", "r");
+    FILE* base = fopen("PROVAO.TXT", "r");
     if (!base) {
         printf("Erro ao abrir o arquivo.\n");
         return 1;
@@ -78,6 +80,6 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
 
     printf("----------------------------\n");
 
-    
+
     return 0;
 }

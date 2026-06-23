@@ -9,15 +9,15 @@ COMP ItemCompara(Item r1, Item r2) {
         return RegistroCompara(r1.reg, r2.reg);
 }
 
-void HeapConstroi(Item *v, int n) {
+void HeapConstroiSub(Item *v, int n) {
     int left = n / 2 - 1;//inicia a construção da heap a partir do último nó pai
     while (left >= 0) {
-        HeapRefaz(v, left, n - 1);
+        HeapRefazSub(v, left, n - 1);
         left--;
     }
 }
 
-void HeapRefaz(Item *v, int l, int r) {
+void HeapRefazSub(Item *v, int l, int r) {
     Item aux = v[l];
     int i = l;
     int j = i * 2 + 1;
