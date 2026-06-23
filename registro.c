@@ -1,6 +1,7 @@
 #include "registro.h"
 
 COMP RegistroCompara(Registro r1, Registro r2) {
+    
     if (r1.nota < r2.nota)
         return MENOR;
     else if (r1.nota > r2.nota)

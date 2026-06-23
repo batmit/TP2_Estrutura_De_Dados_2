@@ -66,9 +66,9 @@ void IntercalacaoBalanceada(){
 
 
     Registro copia;
-    int i = leRegistro(arquivo, &copia);
+    bool booleano = leRegistro(arquivo, &copia);
     // a variável i representa a posiçao no vetor em memória principal
-    i = 0;
+    int i = 0;
 
     //a variável w representa em qual fita de entrada está sendo escrita
     int w = 1;
@@ -135,6 +135,8 @@ void IntercalacaoBalanceada(){
 
     for(int i = 0; i < 20; i++){
 
+        //VERIFICAR SE LEU O CORINGA
+
         if(fread(&registros[i], sizeof(Registro), 1, ponteirosDeFile[i]) != 1){
 
             ativos[i] = false;
@@ -144,8 +146,11 @@ void IntercalacaoBalanceada(){
 
 
     while(ativosNum > 0){
-
+        
+        //Pode ser que eu acaba lendo menos de 20s
+        
         menor = indiceMenorRegistro(registros, 20, ativos);
+        //Caso nenhuma fita está ativa mais
         if(menor == -1){
 
             sprintf(nomeArquivo, "fitas/saida_%02d.bin", fitaSaida);
@@ -175,9 +180,13 @@ void IntercalacaoBalanceada(){
 
             if(fread(&registros[menor], sizeof(Registro), 1, ponteirosDeFile[menor]) != 1){
 
+                //Verificação do curinga
+
                 ativos[menor] = false;
                 ativosNum--;
+
             }
+            //SE FALHAR EU DEVO REMOVER O MENOR DA LEITURA
 
 
         }
@@ -295,15 +304,14 @@ void fecharFitasIntercalacao(FILE* fitas[FITAS_ENTRADA]) {
     }
 }
 
-
+//RESOLVER ESSA FUNÇÃO
+//Podemos utilizar heap
 int indiceMenorRegistro(Registro v[], int n, bool ativos[20]) {
     int menor = -1;
 
     for (int i = 0; i < n; i++) {
         if (ativos[i] && v[i].nota != -1) {
-            if (menor == -1) {
-                menor = i;
-            } else if (RegistroCompara(v[i], v[menor]) == MENOR) {
+            if (RegistroCompara(v[i], v[menor]) == MENOR) {
                 menor = i;
             }
         }
