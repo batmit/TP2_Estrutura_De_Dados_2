@@ -4,7 +4,7 @@
 #include "registro.h"
 #include "fitas.h"
 #include <math.h>
-
+#include<stdbool.h>
 #ifdef _WIN32
     #include <direct.h>
     #define criarPasta(nome) _mkdir(nome)
@@ -27,10 +27,12 @@ int contarRegistrosTxt(const char* nomeArquivo);
 void fecharFitasIntercalacao(FILE* fitas[FITAS_ENTRADA]);
 
 //int lerRegistro(FILE *arquivo, Registro *r);
-void IntercalacaoBalanceada();
+void IntercalacaoBalanceada(FILE* arquivo, int quantidade, int situacao, Dados *dados);
 
 void trimFim(char* str);
 
-double calculaP(long n);
+double calculaP(int n);
+
+void criarTxt(const char* nomeArquivoSaida);
 
 #endif

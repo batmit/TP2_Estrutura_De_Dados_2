@@ -42,43 +42,46 @@ void HeapRefaz(Registro *v, int l, int r) {
 }
 
 
-void IntercalacaoBalanceada(){
+void IntercalacaoBalanceada(FILE* arquivo, int quantidade, int situacao, Dados* dados) {
     //calcular o número de registros e quantas passadas serão necessárias para se ordenar
-    long numRegistros = contarRegistrosTxt("PROVAO.TXT");
 
-    double passadasNasFitas = calculaP(numRegistros);
+    double passadasNasFitas = calculaP(quantidade);
 
     //Cria a página de fitas
     ChamarCriadorFitas();
 
     //Primeira leitura e armazenamento em memória interna---------------------------------------
-    Registro registros[20];
-    FILE* arquivo = fopen("PROVAO.TXT", "r");
-    if (arquivo == NULL) {
-        printf("Erro ao abrir PROVAO.TXT\n");
-        return;
-    }
+    Registro registros[m];
+    
     char nomeArquivo[100];
     int menor;
+
+    //curinga indica o fim de um bloco de registro
     Registro curinga;
     curinga.numero = -1;
     curinga.nota = -1;
 
 
     Registro copia;
-    bool booleano = leRegistro(arquivo, &copia);
-    // a variável i representa a posiçao no vetor em memória principal
-    int i = 0;
+    if(!leRegistro(arquivo, &copia)){
+        printf("Erro ao ler os registros do arquivo.\n");
+        return;
+    }
+
+    // a variável tamMemoria representa a posiçao no vetor em memória principal
+    int tamMemoria = 0;
 
     //a variável w representa em qual fita de entrada está sendo escrita
-    int w = 1;
+    int w = 1, contador = 0;
 
     do{
 
-        registros[i] = copia;
+        registros[tamMemoria] = copia;
 
-        if(i == 19){
+        //se a memoria interna estiver cheia, ordena e escreve um bloco na fita
+        if(tamMemoria == 19){
 
+            //se fita ultrapassa o limite de 20, volta pra primeira fita
             if(w == 21){
                 w = 1;
             }
@@ -88,28 +91,32 @@ void IntercalacaoBalanceada(){
             sprintf(nomeArquivo, "fitas/entrada_%02d.bin", w);
 
             FILE *fita = fopen(nomeArquivo, "ab");
+            //escreve os 20 registros ordenados e o curinga no final do bloco
             fwrite(registros, sizeof(Registro), 20, fita);
             fwrite(&curinga, sizeof(Registro), 1, fita);
             fclose(fita);
 
+            //atualiza a fita a ser escrita e reinicia o indice da memoria interna
             w++;
-            i = 0;
+            tamMemoria = 0;
         }else{
-            i++;
+            tamMemoria++;
 
         }
-
-
-    }while(leRegistro(arquivo, &copia));
-    //Caso não seja divisível por 20
-    if(i != 0){
-        HeapSort(registros, i);
+        contador++;
+    //realiza a leitura enquanto houver registros no arquivo
+    }while(leRegistro(arquivo, &copia) && contador <= quantidade);
+    
+    //se i nao termina em 0, numRegistros não é divisível por 20
+    //ordena os registros restantes e escreve na devida fita
+    if(tamMemoria != 0){
+        HeapSort(registros, tamMemoria);
 
         sprintf(nomeArquivo, "fitas/entrada_%02d.bin", w);
 
 
         FILE *fita = fopen(nomeArquivo, "ab");
-        fwrite(registros, sizeof(Registro), i, fita);
+        fwrite(registros, sizeof(Registro), tamMemoria, fita);
         fwrite(&curinga, sizeof(Registro), 1, fita);
 
         fclose(fita);
@@ -121,15 +128,20 @@ void IntercalacaoBalanceada(){
     fclose(arquivo);
 
     //Primeira passada sobre o arquivo na fase de intercalação----------------------------------------------
+    //Blocos iniciais foram gerados
 
     FILE* ponteirosDeFile[FITAS_ENTRADA];
 
     abrirFitasEntrada(ponteirosDeFile, 0);
-    bool ativos[20];
-    int ativosNum = 20;
-    for(int i = 0; i < 20; i++){
+    
+    //
+    bool ativos[m];
+    int ativosNum = m;
+    for(int i = 0; i < m; i++){
+        //todas as fitas começam ativas
         ativos[i] = true;
     }
+
 
     int fitaSaida = 1;
 
@@ -141,6 +153,10 @@ void IntercalacaoBalanceada(){
 
             ativos[i] = false;
             ativosNum--;
+        }else if(registros[i].nota == -1){
+            ativos[i] = false;
+            ativosNum--;
+            
         }
     }
 
@@ -149,25 +165,32 @@ void IntercalacaoBalanceada(){
         
         //Pode ser que eu acaba lendo menos de 20s
         
+
+        //menor indica o índice da fita com o menor valor retirado 
         menor = indiceMenorRegistro(registros, 20, ativos);
         //Caso nenhuma fita está ativa mais
         if(menor == -1){
 
             sprintf(nomeArquivo, "fitas/saida_%02d.bin", fitaSaida);
 
+            //finaliza um bloco na fita de saída (terminou de intercalar blocos das fitas de entrada)
             FILE *fita = fopen(nomeArquivo, "ab");
             fwrite(&curinga, sizeof(Registro), 1, fita);
             fclose(fita);
 
             //Leio todos mais uma vez
+            ativosNum = m;
             for(int i = 0; i < 20; i++){
                 if(fread(&registros[i], sizeof(Registro), 1, ponteirosDeFile[i]) != 1){
 
                     ativos[i] = false;
                     ativosNum--;
+                }else{
+                    ativos[i] = true;
                 }
 
             }
+            
             fitaSaida++;
 
         }else {
@@ -185,45 +208,46 @@ void IntercalacaoBalanceada(){
                 ativos[menor] = false;
                 ativosNum--;
 
+            }else if(registros[menor].nota == -1){
+                ativos[menor] = false;
+                ativosNum--;
+                
             }
             //SE FALHAR EU DEVO REMOVER O MENOR DA LEITURA
-
-
         }
-
-
-
     }
 
     fecharFitasIntercalacao(ponteirosDeFile);
     //Sequencia de passadas sobre, com base na regra de P(n)------------------------------------------------------------------
 
 
-    for(int i = 1; i < passadasNasFitas; i++){
+    for(int i = 0; i < passadasNasFitas -1; i++){
 
         if(i % 2 == 1){
-
             abrirFitasSaida(ponteirosDeFile, 1);
+        }
 
-        }else{
-
+        else{
             abrirFitasEntrada(ponteirosDeFile, 1);
-
         }
+        
         ativosNum = 20;
-        for(int i = 0; i < 20; i++){
-            ativos[i] = true;
-        }
+        for(int j = 0; j < 20; j++)
+            ativos[j] = true;
 
         int fitasAtual = 1;
 
-        for(int i = 0; i < 20; i++){
+        for(int j = 0; j < 20; j++){
 
-            if(fread(&registros[i], sizeof(Registro), 1, ponteirosDeFile[i]) != 1){
+            if(fread(&registros[j], sizeof(Registro), 1, ponteirosDeFile[j]) != 1){
 
-                ativos[i] = false;
+                ativos[j] = false;
                 ativosNum--;
 
+            }else if(registros[j].nota == -1){
+                ativos[j] = false;
+                ativosNum--;
+            
             }
         }
 
@@ -247,13 +271,15 @@ void IntercalacaoBalanceada(){
                 fwrite(&curinga, sizeof(Registro), 1, fita);
                 fclose(fita);
 
-
+                ativosNum = 20;
                 //Leio todos mais uma vez
-                for(int i = 0; i < 20; i++){
-                    if(fread(&registros[i], sizeof(Registro), 1, ponteirosDeFile[i]) != 1){
+                for(int j = 0; j < 20; j++){
+                    if(fread(&registros[j], sizeof(Registro), 1, ponteirosDeFile[j]) != 1){
 
-                        ativos[i] = false;
+                        ativos[j] = false;
                         ativosNum--;
+                    }else{
+                        ativos[j] = true;
                     }
 
                 }
@@ -277,6 +303,10 @@ void IntercalacaoBalanceada(){
 
                     ativos[menor] = false;
                     ativosNum--;
+                }else if(registros[i].nota == -1){
+                    ativos[menor] = false;
+                    ativosNum--;
+            
                 }
 
 
@@ -308,20 +338,19 @@ void fecharFitasIntercalacao(FILE* fitas[FITAS_ENTRADA]) {
 //Podemos utilizar heap
 int indiceMenorRegistro(Registro v[], int n, bool ativos[20]) {
     int menor = -1;
-
     for (int i = 0; i < n; i++) {
         if (ativos[i] && v[i].nota != -1) {
-            if (RegistroCompara(v[i], v[menor]) == MENOR) {
+            if (menor == -1 || RegistroCompara(v[i], v[menor]) == MENOR) {
                 menor = i;
             }
         }
     }
-
     return menor;
+    
 }
 
 
-double calculaP(long n) {
+double calculaP(int n) {
     // int m = 20; Já é uma constante definida em intercalacao.h
     int f = 20;
 
@@ -374,13 +403,13 @@ void abrirFitasEntrada(FILE* fitasEntrada[FITAS_ENTRADA], int n) {
     for (int i = 0; i < FITAS_ENTRADA; i++) {
         sprintf(nomeArquivo, "fitas/entrada_%02d.bin", i + 1);
 
+        //assassino "limpa" o arquivo
         if(n == 1){
-
-            FILE* assasino = fopen(nomeArquivo, "wb");
-            fclose(assasino);
-
+            FILE* assassino = fopen(nomeArquivo, "wb");
+            fclose(assassino);
         }
 
+        //cria uma fita de entrada
         fitasEntrada[i] = fopen(nomeArquivo, "rb");
 
         if (fitasEntrada[i] == NULL) {
@@ -401,11 +430,10 @@ void abrirFitasSaida(FILE* fitasSaida[FITAS_ENTRADA], int n) {
     for (int i = 0; i < FITAS_ENTRADA; i++) {
         sprintf(nomeArquivo, "fitas/saida_%02d.bin", i + 1);
         if(n == 1){
-
-            FILE* assasino = fopen(nomeArquivo, "wb");
-            fclose(assasino);
-
+            FILE* assassino = fopen(nomeArquivo, "wb");
+            fclose(assassino);
         }
+        
         fitasSaida[i] = fopen(nomeArquivo, "rb");
 
         if (fitasSaida[i] == NULL) {
@@ -460,6 +488,8 @@ int leRegistro(FILE* arquivo, Registro* reg) {
     return 1;
 }
 */
+
+
 void trimFim(char* str) {
     int i = strlen(str) - 1;
 
@@ -497,12 +527,14 @@ void InsereItem(Registro item, Registro* Area) {
 
 // Remove o registro com a menor nota
 void RetiraPrimeiro(Registro* Area, Registro* R) {
+    //calcula numero de registros na memoria
     int n = ObterNumCelOcupadas(Area);
+    
     if (n == 0) return;
 
-    *R = Area[0]; // Elemento mínimo está no começo
+    *R = Area[0]; //menor elemento está no começo
 
-    // Move os elementos restantes para a esquerda
+    //move os elementos restantes para a esquerda
     for (int i = 0; i < n - 1; i++)
         Area[i] = Area[i + 1];
 
@@ -527,4 +559,85 @@ void RetiraUltimo(Registro* Area, Registro* R) {
     strcpy(Area[n - 1].estado, "");
     strcpy(Area[n - 1].cidade, "");
     strcpy(Area[n - 1].curso, "");
+}
+
+void criarTxt(const char* nomeArquivoSaida) {
+
+    /* Conta quantos curingas (fim de bloco) existem em uma fita.
+       Uma fita totalmente ordenada tem exatamente 1 bloco → 1 curinga. */
+    int contarCuringas(const char* nomeFita) {
+        FILE* f = fopen(nomeFita, "rb");
+        if (!f) return -1; /* fita inexistente */
+
+        Registro reg;
+        int curingas = 0;
+        while (fread(&reg, sizeof(Registro), 1, f) == 1) {
+            if (reg.nota == -1 && reg.numero == -1)
+                curingas++;
+        }
+        fclose(f);
+        return curingas;
+    }
+
+    /* Descobre qual das duas fitas candidatas é a fita final ordenada */
+    const char* candidatos[2] = {
+        "fitas/saida_01.bin",
+        "fitas/entrada_01.bin"
+    };
+
+    const char* fitaFinal = NULL;
+
+    for (int i = 0; i < 2; i++) {
+        int c = contarCuringas(candidatos[i]);
+        /* A fita final tem exatamente 1 curinga (um único bloco ordenado) */
+        if (c == 1) {
+            fitaFinal = candidatos[i];
+            break;
+        }
+    }
+
+    if (!fitaFinal) {
+        printf("criarTxt: nao foi possivel identificar a fita de saida final.\n");
+        return;
+    }
+
+    printf("criarTxt: fita de saida final identificada como '%s'.\n", fitaFinal);
+
+    /* Traduz a fita final para texto */
+    FILE* fita = fopen(fitaFinal, "rb");
+    if (!fita) {
+        printf("criarTxt: erro ao abrir '%s'.\n", fitaFinal);
+        return;
+    }
+
+    FILE* arquivoSaida = fopen(nomeArquivoSaida, "w");
+    if (!arquivoSaida) {
+        printf("criarTxt: erro ao criar '%s'.\n", nomeArquivoSaida);
+        fclose(fita);
+        return;
+    }
+
+    Registro reg;
+    int totalEscritos = 0;
+
+    while (fread(&reg, sizeof(Registro), 1, fita) == 1) {
+        /* Ignora curingas de fim de bloco */
+        if (reg.nota == -1 && reg.numero == -1)
+            continue;
+
+        /* Reproduz a formatação original do PROVAO.TXT */
+        fprintf(arquivoSaida,
+                "%-8ld %05.2f %s %-50s %-30s\n",
+                reg.numero,
+                reg.nota,
+                reg.estado,
+                reg.cidade,
+                reg.curso);
+        totalEscritos++;
+    }
+
+    fclose(fita);
+    fclose(arquivoSaida);
+
+    printf("criarTxt: %d registros escritos em '%s'.\n", totalEscritos, nomeArquivoSaida);
 }

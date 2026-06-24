@@ -26,7 +26,7 @@ bool leRegistro(FILE* arquivo, Registro* reg) {
     if (fgets(linha, sizeof(linha), arquivo) != NULL) {
     
         char numero[9];//numero tem 8 caracteres + \0 (ex: "00670838 + \0")
-        char nota[6];//nora tem 5 caracteres + \0 (ex: "06.70 + \0")
+        char nota[6];//nota tem 5 caracteres + \0 (ex: "06.70 + \0")
 
         // strncpy(destino, origem[posicao_inicial], qtd_caracteres)
         
@@ -64,7 +64,7 @@ void imprimirRegistros(FILE* arquivo){
 }
 
 //transforma o arquivo texto em binario para facilitar a leitura e escrita durante os processos de ordenação
-FILE* criaArquivoBinario(FILE* arquivoTexto, const char* nomeArquivoBinario) {
+FILE* criaArquivoBinario(FILE* arquivoTexto, const char* nomeArquivoBinario, Dados* dados) {
     FILE* arquivoBinario = fopen(nomeArquivoBinario, "wb");
     if (!arquivoBinario) {
         printf("Erro ao criar o arquivo binário.\n");
@@ -73,7 +73,9 @@ FILE* criaArquivoBinario(FILE* arquivoTexto, const char* nomeArquivoBinario) {
 
     Registro reg;
     while (leRegistro(arquivoTexto, &reg)) {
+        dados->transferencias.leituras++;
         fwrite(&reg, sizeof(Registro), 1, arquivoBinario);
+        dados->transferencias.escritas++;
     }
 
     fclose(arquivoBinario);

@@ -17,6 +17,11 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
     dados.transferencias.leituras = 0;
     dados.transferencias.escritas = 0;
 
+    Dados dadosCriacao;
+    dadosCriacao.comparacoes = 0;
+    dadosCriacao.transferencias.leituras = 0;
+    dadosCriacao.transferencias.escritas = 0;
+
     clock_t inicio, fim;
 
     FILE* base = fopen("PROVAO.TXT", "r");
@@ -25,7 +30,7 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
         return 1;
     }
 
-    FILE* arquivoBinario = criaArquivoBinario(base, "PROVAO.bin");
+    FILE* arquivoBinario = criaArquivoBinario(base, "PROVAO.bin", &dadosCriacao);
     if (!arquivoBinario) {
         printf("Erro ao criar o arquivo binário.\n");
         return 1;
@@ -33,8 +38,19 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
 
     if(atoi(argv[1]) == 1){//Intercalação Balanceada de 2f caminhos
         inicio = clock();
-        IntercalacaoBalanceada();
+        FILE* arquivo = fopen("PROVAO.TXT", "r");
+        if (arquivo == NULL) {
+            printf("Erro ao abrir PROVAO.TXT\n");
+            return 1;
+        }
+        IntercalacaoBalanceada(arquivo, atoi(argv[2]) + 1, atoi(argv[3]), &dados);
         fim = clock();
+        FILE *final = fopen("fitas/entrada_01.bin", "rb");
+        FILE *final2 = fopen("fitas/entrada_02.bin", "rb");
+        criaArquivoSaida(final, "Resultado.txt");
+        criaArquivoSaida(final2, "Resultado2.txt");
+        //criarTxt("PROVAO_ordenado.txt");
+        
     }
     else if(atoi(argv[1]) == 2){//Intercalação Balanceada de 2f caminhos com substituição por seleção
         inicio = clock();
@@ -59,7 +75,7 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
             printf("Erro ao criar o arquivo LEs.bin.\n");
             return 1;
         }
-        QuickSortExterno(&Li, &Ei, &LEs, 1, atoi(argv[2]), &dados);
+        //QuickSortExterno(&Li, &Ei, &LEs, 1, atoi(argv[2]), &dados);
         fim = clock();
     }
     else{
@@ -71,6 +87,11 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
         imprimirRegistros(arquivoBinario);
     }
 
+    printf("----------------------------\n");
+    printf("Criacao do arquivo binario:\n");
+    printf("\tTransferencias de escrita: %d\n", dadosCriacao.transferencias.escritas);
+    printf("\tTransferencias de leitura: %d\n\n\n", dadosCriacao.transferencias.leituras);
+    
     double tempo = (double)(fim - inicio) / CLOCKS_PER_SEC;
      //calcula o tempo gasto na busca
     printf("Comparacoes na ordenação: %d\n", dados.comparacoes);
@@ -80,6 +101,8 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
 
     printf("----------------------------\n");
 
+
+    
 
     return 0;
 }
