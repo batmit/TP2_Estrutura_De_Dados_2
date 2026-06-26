@@ -36,25 +36,14 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
         return 1;
     }
 
-    if(atoi(argv[1]) == 1){//Intercalação Balanceada de 2f caminhos
+    if(atoi(argv[1]) == 1 || atoi(argv[1]) == 2){//Intercalação Balanceada de 2f caminhos
         inicio = clock();
         FILE* arquivo = fopen("PROVAO.TXT", "r");
         if (arquivo == NULL) {
             printf("Erro ao abrir PROVAO.TXT\n");
             return 1;
         }
-        IntercalacaoBalanceada(arquivo, atoi(argv[2]) + 1, atoi(argv[3]), &dados);
-        fim = clock();
-        FILE *final = fopen("fitas/entrada_01.bin", "rb");
-        FILE *final2 = fopen("fitas/entrada_02.bin", "rb");
-        criaArquivoSaida(final, "Resultado.txt");
-        criaArquivoSaida(final2, "Resultado2.txt");
-        //criarTxt("PROVAO_ordenado.txt");
-        
-    }
-    else if(atoi(argv[1]) == 2){//Intercalação Balanceada de 2f caminhos com substituição por seleção
-        inicio = clock();
-        //IntercalacaoBalanceadaSubstituicao();
+        IntercalacaoBalanceada(arquivo, atoi(argv[2]) + 1, atoi(argv[3]), atoi(argv[1]), &dados);
         fim = clock();
     }
     else if(atoi(argv[1]) == 3){//QuickSort Externo

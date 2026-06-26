@@ -4,7 +4,7 @@
 
 #define FITAS_ENTRADA 20
 #define FITAS_SAIDA 20
-#define TOTAL_FITAS 40
+#define TOTAL_FITAS FITAS_ENTRADA + FITAS_SAIDA
 
 int ChamarCriadorFitas();
 void fecharFitas(FILE* entrada[FITAS_ENTRADA], FILE* saida[FITAS_SAIDA]);

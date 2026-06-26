@@ -1,8 +1,9 @@
 #ifndef INTERCALACAO_H
 #define INTERCALACAO_H
-// #define FITAS_ENTRADA 20
 #include "registro.h"
 #include "fitas.h"
+#include "heap.h"
+
 #include <math.h>
 #include<stdbool.h>
 #ifdef _WIN32
@@ -13,9 +14,7 @@
     #include <sys/types.h>
     #define criarPasta(nome) mkdir(nome, 0777)
 #endif
-void HeapSort(Registro *v, int n);
-void HeapConstroi(Registro *v, int n);
-void HeapRefaz(Registro *v, int l, int r);
+
 // int ChamarCriadorFitas();
 // void fecharFitas(FILE* entrada[FITAS_ENTRADA], FILE* saida[FITAS_SAIDA]);
 // bool criarFitas(FILE* entrada[FITAS_ENTRADA], FILE* saida[FITAS_SAIDA]);
@@ -26,13 +25,13 @@ int contarRegistrosTxt(const char* nomeArquivo);
 
 void fecharFitasIntercalacao(FILE* fitas[FITAS_ENTRADA]);
 
+int geraBlocosHeap(FILE* arquivo, int quantidade, Dados *dados);
+
 //int lerRegistro(FILE *arquivo, Registro *r);
-void IntercalacaoBalanceada(FILE* arquivo, int quantidade, int situacao, Dados *dados);
+void IntercalacaoBalanceada(FILE* arquivo, int quantidade, int situacao, int metodo, Dados *dados);
 
 void trimFim(char* str);
 
 double calculaP(int n);
-
-void criarTxt(const char* nomeArquivoSaida);
 
 #endif

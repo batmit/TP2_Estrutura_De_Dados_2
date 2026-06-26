@@ -91,7 +91,7 @@ FILE* criaArquivoSaida(FILE* arquivoBinario, const char* nomeArquivoSaida) {
     }
 
     Registro reg;
-    while (fread(&reg, sizeof(Registro), 1, arquivoBinario)) {
+    while (fread(&reg, sizeof(Registro), 1, arquivoBinario) && reg.nota != -1) {
         fprintf(arquivoSaida, "%08ld %05.2f %s %s %s\n", reg.numero, reg.nota, reg.estado, reg.cidade, reg.curso);
     }
 

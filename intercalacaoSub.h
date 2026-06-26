@@ -2,6 +2,7 @@
 #define INTERCALACAOSUB_H
 
 #include "registro.h"
+#include "heap.h"
 
 typedef struct {
     Registro reg;
@@ -10,7 +11,17 @@ typedef struct {
 
 void HeapConstroiSub(Item *v, int n);
 void HeapRefazSub(Item *v, int l, int r);
+Item heapRemoveSub(Item *h, int *n);
 
 COMP ItemCompara(Item r1, Item r2);
+
+bool novoBloco(Item *v, int  n);
+void desmarcaElementos(Item* v, int n);
+void transformaEmItem(Registro r, Item* i);
+void transformaEmRegistro(Item i, Registro* r);
+
+int geraBlocosSubstituicao(FILE* arquivo, int quantidade, Dados *dados);
+
+bool leItem(FILE* arquivo, Item* reg);
 
 #endif
