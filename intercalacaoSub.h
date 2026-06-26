@@ -11,7 +11,10 @@ typedef struct {
 
 void HeapConstroiSub(Item *v, int n);
 void HeapRefazSub(Item *v, int l, int r);
-Item heapRemoveSub(Item *h, int *n);
+Item HeapRemoveSub(Item *h, int *n);
+
+void HeapInsereSub(Item *h, Item novo);
+void HeapSobeSub(Item *h, int i);
 
 COMP ItemCompara(Item r1, Item r2);
 

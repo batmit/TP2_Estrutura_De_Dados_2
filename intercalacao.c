@@ -165,9 +165,11 @@ void IntercalacaoBalanceada(FILE *arquivo, int quantidade, int situacao, int met
     //Primeira intercalação (entrada -> saída)
 
     FILE *ponteiros[FITAS_ENTRADA];
-    abrirFitasEntrada(ponteiros, 0);   /* 0 = não apaga, só abre para leitura */
+    // abrirFitasEntrada(ponteiros, 0);   /* 0 = não apaga, só abre para leitura */
 
-    fecharFitasIntercalacao(ponteiros);
+    // intercalaFitas(ponteiros, FITAS_ENTRADA, "fitas/entrada_%02d.bin", FITAS_ENTRADA);
+
+    // fecharFitasIntercalacao(ponteiros);
 
     //Passadas alternando entrada e saída
     for (int p = 0; p < (int)passadasNasFitas; p++) {

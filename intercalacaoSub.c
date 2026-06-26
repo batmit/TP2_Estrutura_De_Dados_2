@@ -11,16 +11,12 @@ COMP ItemCompara(Item r1, Item r2) {
 }
 
 bool novoBloco(Item *v, int  n){
-    
     bool novo = true;
-
     for(int i = 0; i < n; i++){
         novo = novo && v[i].marcado;
     }
-
     if(novo)
         desmarcaElementos(v, n);
-    
     return novo;
 }
 
@@ -58,44 +54,47 @@ Item heapRemoveSub(Item *h, int *n){
 }
 
 void HeapConstroiSub(Item *v, int n) {
-    int left = n / 2 - 1;//inicia a construção da heap a partir do último nó pai
+    int left = n / 2 - 1;
     while (left >= 0) {
         HeapRefazSub(v, left, n - 1);
         left--;
     }
 }
 
+/* CORREÇÃO 1: Construção de MIN-HEAP */
 void HeapRefazSub(Item *v, int l, int r) {
     Item aux = v[l];
     int i = l;
     int j = i * 2 + 1;
+    
     while (j <= r) {
-        if (j < r && ItemCompara(v[j], v[j + 1]) == MENOR)
+        // Encontra o MENOR filho
+        if (j < r && ItemCompara(v[j], v[j + 1]) == MAIOR)
             j++;
+            
         COMP resp = ItemCompara(aux, v[j]);
-        if (resp == MAIOR || resp == IGUAL)
+        
+        // Se o pai já é menor ou igual ao menor filho, a propriedade está mantida
+        if (resp == MENOR || resp == IGUAL)
             break;
+            
         v[i] = v[j];
-        i = j;//desce o elemento aux para a posição correta na heap
-        j = i * 2 + 1;//novo filho esquerdo
+        i = j; // Desce o elemento aux para a posição correta
+        j = i * 2 + 1;
     }
     v[i] = aux;
 }
 
+/* CORREÇÃO 2: Lógica otimizada de Seleção por Substituição */
 int geraBlocosSubstituicao(FILE* arquivo, int quantidade, Dados *dados) {
     int blocosGerados = 0;
     
     ChamarCriadorFitas();
 
-    //Geração dos blocos iniciais via HeapSort
-
     Item itens[TAM_MEMORIA];
     int tamHeap = 0;
     char nomeArquivo[100];
 
-    Item menorItem;
-
-    //curinga indica o fim de um bloco de registro
     Registro curinga;
     curinga.numero = -1;
     curinga.nota = -1;
@@ -103,57 +102,82 @@ int geraBlocosSubstituicao(FILE* arquivo, int quantidade, Dados *dados) {
     curinga.curso[0] = '\0';
     curinga.estado[0] = '\0';
 
+    int contador = 0;
     Item novoItem;
-    leItem(arquivo, &novoItem);
 
-    // a variável i representa a posiçao no vetor em memória principal
-    int i = 0;
+    //Preenche a memoria totalmente
+    while (tamHeap < TAM_MEMORIA && contador < quantidade && leItem(arquivo, &novoItem)) {
+        itens[tamHeap] = novoItem;
+        tamHeap++;
+        contador++;
+    }
 
-    //a variável w representa em qual fita de entrada está sendo escrita
+    if (tamHeap == 0)
+        return 0;
+
+    HeapConstroiSub(itens, tamHeap);
+
     int w = 1;
+    sprintf(nomeArquivo, "fitas/entrada_%02d.bin", w);
+    FILE *fita = fopen(nomeArquivo, "ab");
 
-    int contador = 1;
-
-    do {
-        itens[i] = novoItem;
-
-        if (i == TAM_MEMORIA - 1) {
-
-            sprintf(nomeArquivo, "fitas/entrada_%02d.bin", w);
-            FILE *fita = fopen(nomeArquivo, "ab");
-
-            if(novoBloco(itens, TAM_MEMORIA)){
-                fwrite(&curinga, sizeof(Item), 1, fita);
-                blocosGerados++;
-                w++;
-            }
+    while (tamHeap > 0) {
+        // Se a raiz está marcada, significa que todos os elementos estão marcados
+        if (itens[0].marcado) {
             
+            //escreve o curinga para simbolizar o fum do bloco
+            fwrite(&curinga, sizeof(Registro), 1, fita);
+            fclose(fita);
+            blocosGerados++;
+
+            //atualiza para a proxima fita
+            w++;
             if (w == FITAS_ENTRADA + 1)
                 w = 1;
-
-            HeapRefazSub(itens, 0, TAM_MEMORIA);
-
-            menorItem = heapRemoveSub(itens, &tamHeap);
-
-            Registro r;
-            transformaEmRegistro(menorItem, &r);
-            fwrite(&r, sizeof(Registro), 1, fita);
-
-            i--;
-            fclose(fita);
-        }
-        else{
-            i++;
+                
+            sprintf(nomeArquivo, "fitas/entrada_%02d.bin", w);
+            fita = fopen(nomeArquivo, "ab");
+            
+            //desmarca os elementos pra proxima fita
+            desmarcaElementos(itens, tamHeap);
+            //reconstroi o heap pra manter a ordenação correta
+            HeapConstroiSub(itens, tamHeap); 
         }
 
-        contador++;
-        leItem(arquivo, &novoItem);
-        
-        if(ItemCompara(novoItem, menorItem) == MENOR)
-            novoItem.marcado = true;
-        
-    } while (contador < quantidade);
+        //remove o menor item e insere na fita de saída atual
+        Item menorItem = itens[0];
+        Registro r;
+        transformaEmRegistro(menorItem, &r);
+        fwrite(&r, sizeof(Registro), 1, fita);
 
+        //tenta ler um novo registro para colocar no lugar da raiz
+        if (contador < quantidade && leItem(arquivo, &novoItem)) {
+            contador++;
+            
+            //se o novo item for menor que o último, não entra neste bloco e é marcado como maior que todos
+            if (RegistroCompara(novoItem.reg, menorItem.reg) == MENOR) {
+                novoItem.marcado = true;
+            }
+            
+            //coloca o novo item diretamente na raiz e refaz o heap
+            itens[0] = novoItem;
+            HeapRefazSub(itens, 0, tamHeap - 1);
+            
+        } 
+        else {
+            //se o arquivo de leitura acabou, retiramos valores do heap
+            itens[0] = itens[tamHeap - 1];
+            tamHeap--;
+            if (tamHeap > 0) {
+                HeapRefazSub(itens, 0, tamHeap - 1);
+            }
+        }
+    }
+
+    //fecha o último bloco aberto
+    fwrite(&curinga, sizeof(Registro), 1, fita);
+    blocosGerados++;
+    fclose(fita);
 
     return blocosGerados;
 }
