@@ -150,7 +150,7 @@ void intercalaFitas(FILE *entrada[], int quantFitas, char *prefixoSaida, int num
 //IntercalacaoBalanceada
 //============================================================
 
-void IntercalacaoBalanceada(FILE *arquivo, int quantidade, int situacao, int metodo, Dados *dados) {
+void IntercalacaoBalanceada(FILE *arquivo, int quantidade, int metodo, Dados *dados) {
 
     int quantidadeBlocos;
     if(metodo == 1){

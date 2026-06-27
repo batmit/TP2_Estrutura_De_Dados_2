@@ -36,6 +36,8 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
         return 1;
     }
 
+    prepararBinario("PROVAO.bin", atoi(argv[2])+1, atoi(argv[3]));
+
     if(atoi(argv[1]) == 1 || atoi(argv[1]) == 2){//Intercalação Balanceada de 2f caminhos
         inicio = clock();
         FILE* arquivo = fopen("PROVAO.bin", "rb");
@@ -43,7 +45,7 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
             printf("Erro ao abrir PROVAO.bin\n");
             return 1;
         }
-        IntercalacaoBalanceada(arquivo, atoi(argv[2]) + 1, atoi(argv[3]), atoi(argv[1]), &dados);
+        IntercalacaoBalanceada(arquivo, atoi(argv[2]) + 1, atoi(argv[1]), &dados);
         fim = clock();
     }
     else if(atoi(argv[1]) == 3){//QuickSort Externo
@@ -64,7 +66,7 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
             printf("Erro ao criar o arquivo LEs.bin.\n");
             return 1;
         }
-        //QuickSortExterno(&Li, &Ei, &LEs, 1, atoi(argv[2]), &dados);
+        QuickSortExterno(&Li, &Ei, &LEs, 1, atoi(argv[2]), &dados);
         fim = clock();
     }
     else{
@@ -72,9 +74,8 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
         return 1;
     }
 
-    if(argc == 5 && strcmp(argv[4], "-P") == 0) {//
+    if(argc == 5 && strcmp(argv[4], "-P") == 0)
         imprimirRegistros(arquivoBinario);
-    }
 
     printf("----------------------------\n");
     printf("Criacao do arquivo binario:\n");

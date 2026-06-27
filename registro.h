@@ -44,4 +44,6 @@ COMP RegistroCompara(Registro i1, Registro i2, Dados *dados);
 FILE* criaArquivoBinario(FILE* arquivoTexto, const char* nomeArquivoBinario, Dados* dados);
 FILE* criaArquivoSaida(FILE* arquivoBinario, const char* nomeArquivoSaida);
 
+void prepararBinario(const char* arquivo, int quantidade, int situacao);
+
 #endif

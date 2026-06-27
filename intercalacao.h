@@ -30,7 +30,7 @@ void fecharFitasIntercalacao(FILE* fitas[FITAS_ENTRADA]);
 int geraBlocosHeap(FILE* arquivo, int quantidade, Dados *dados);
 
 //int lerRegistro(FILE *arquivo, Registro *r);
-void IntercalacaoBalanceada(FILE* arquivo, int quantidade, int situacao, int metodo, Dados *dados);
+void IntercalacaoBalanceada(FILE* arquivo, int quantidade, int metodo, Dados *dados);
 
 void trimFim(char* str);
 

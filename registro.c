@@ -1,7 +1,10 @@
 #include "registro.h"
+#include "heap.h"
+#include <stdio.h>
 
 COMP RegistroCompara(Registro r1, Registro r2, Dados *dados) {
-    dados->comparacoes++;
+    if(dados)
+        dados->comparacoes++;
 
     if (r1.nota < r2.nota)
         return MENOR;
@@ -60,7 +63,7 @@ bool leRegistro(FILE* arquivo, Registro* reg) {
 
 void imprimirRegistros(FILE* arquivo){
     Registro reg;
-    while(leRegistro(arquivo, &reg))
+    while(fread(&reg, sizeof(Registro), 1, arquivo))
         RegistroPrint(reg);
 }
 
@@ -99,4 +102,54 @@ FILE* criaArquivoSaida(FILE* arquivoBinario, const char* nomeArquivoSaida) {
 
     fclose(arquivoSaida);
     return fopen(nomeArquivoSaida, "rb");
+}
+
+// Função de preparação
+void prepararBinario(const char* arquivo, int quantidade, int situacao) {
+    FILE *arq = fopen(arquivo, "rb+");
+    if (!arq) {
+        printf("Erro ao abrir %s para preparação.\n", arquivo);
+        return;
+    }
+
+    Registro *vetor = (Registro*) malloc(quantidade * sizeof(Registro));
+    if (!vetor) {
+        printf("Erro de alocação de memória na preparação.\n");
+        fclose(arq);
+        return;
+    }
+
+    // Lê a quantidade exata de registros do ficheiro binário base
+    int lidos = fread(vetor, sizeof(Registro), quantidade, arq);
+
+    // Se a situação for 1 (Crescente) ou 2 (Decrescente), ordena o vetor na memória
+    if (situacao == 1 || situacao == 2) {
+        // Insertion Sort
+        for (int i = 1; i < lidos; i++) {
+            Registro pivo = vetor[i];
+            int j = i - 1;
+
+            if (situacao == 1) {
+                // Ordenação Crescente: move os elementos maiores para a direita
+                while (j >= 0 && vetor[j].nota > pivo.nota) {
+                    vetor[j + 1] = vetor[j];
+                    j--;
+                }
+            } else {
+                // Ordenação Decrescente: move os elementos menores para a direita
+                while (j >= 0 && vetor[j].nota < pivo.nota) {
+                    vetor[j + 1] = vetor[j];
+                    j--;
+                }
+            }
+            vetor[j + 1] = pivo;
+        }
+    }
+    // Se situação for 3 (Aleatório), ignora a ordenação e mantém os dados originais.
+
+    fseek(arq, 0, SEEK_SET);
+    fwrite(vetor, sizeof(Registro), lidos, arq);
+
+    free(vetor);
+    fclose(arq);
 }
