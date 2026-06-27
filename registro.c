@@ -145,7 +145,6 @@ void prepararBinario(const char* arquivo, int quantidade, int situacao) {
             vetor[j + 1] = pivo;
         }
     }
-    // Se situação for 3 (Aleatório), ignora a ordenação e mantém os dados originais.
 
     fseek(arq, 0, SEEK_SET);
     fwrite(vetor, sizeof(Registro), lidos, arq);

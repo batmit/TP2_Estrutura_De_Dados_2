@@ -36,7 +36,8 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
         return 1;
     }
 
-    prepararBinario("PROVAO.bin", atoi(argv[2])+1, atoi(argv[3]));
+    if(atoi(argv[3]) != 3) // Ordena se não for aleatório
+        prepararBinario("PROVAO.bin", atoi(argv[2])+1, atoi(argv[3]));
 
     if(atoi(argv[1]) == 1 || atoi(argv[1]) == 2){//Intercalação Balanceada de 2f caminhos
         inicio = clock();
