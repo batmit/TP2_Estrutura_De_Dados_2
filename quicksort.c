@@ -2,7 +2,7 @@
 
 void QuickSortExterno(FILE **Li, FILE **Ei, FILE **LEs, int Esq, int Dir, Dados *dados){
     int i, j;
-    Registro Area[m];
+    Registro Area[TAM_MEMORIA];
 
     if(Dir - Esq < 1)
         return;
@@ -20,7 +20,7 @@ void QuickSortExterno(FILE **Li, FILE **Ei, FILE **LEs, int Esq, int Dir, Dados 
 }
 
 void FAVazia(Registro* Area){
-    for(int i = 0; i < m; i++){
+    for(int i = 0; i < TAM_MEMORIA; i++){
         Area[i].numero = 0;
         Area[i].nota = 0.0;
         strcpy(Area[i].estado, "");
@@ -88,7 +88,7 @@ void Particao(FILE **ArqLi, FILE **ArqEi, FILE **ArqLEs, Registro* Area, int Esq
     while(Ls >= Li){
         dados->comparacoes++;
         dados->transferencias.leituras++;
-        if(NRArea < m - 1){
+        if(NRArea < TAM_MEMORIA - 1){
             dados->transferencias.leituras++;
             if(OndeLer)
                 LeSup(ArqLEs, &UltLido, &Ls, &OndeLer);

@@ -38,9 +38,9 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
 
     if(atoi(argv[1]) == 1 || atoi(argv[1]) == 2){//Intercalação Balanceada de 2f caminhos
         inicio = clock();
-        FILE* arquivo = fopen("PROVAO.TXT", "r");
+        FILE* arquivo = fopen("PROVAO.bin", "rb");
         if (arquivo == NULL) {
-            printf("Erro ao abrir PROVAO.TXT\n");
+            printf("Erro ao abrir PROVAO.bin\n");
             return 1;
         }
         IntercalacaoBalanceada(arquivo, atoi(argv[2]) + 1, atoi(argv[3]), atoi(argv[1]), &dados);
@@ -80,7 +80,7 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
     printf("Criacao do arquivo binario:\n");
     printf("\tTransferencias de escrita: %d\n", dadosCriacao.transferencias.escritas);
     printf("\tTransferencias de leitura: %d\n\n\n", dadosCriacao.transferencias.leituras);
-    
+
     double tempo = (double)(fim - inicio) / CLOCKS_PER_SEC;
      //calcula o tempo gasto na busca
     printf("Comparacoes na ordenação: %d\n", dados.comparacoes);
@@ -91,7 +91,7 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
     printf("----------------------------\n");
 
 
-    
+
 
     return 0;
 }

@@ -4,7 +4,7 @@
 //Auxiliar: intercala um conjunto de fitas abertas para um conjunto de fitas de saída
 //============================================================
 
-void intercalaFitas(FILE *entrada[], int quantFitas, char *prefixoSaida, int numSaida) {
+void intercalaFitas(FILE *entrada[], int quantFitas, char *prefixoSaida, int numSaida, Dados *dados) {
     Registro curinga;
     curinga.numero = -1;
     curinga.nota = -1;
@@ -29,6 +29,7 @@ void intercalaFitas(FILE *entrada[], int quantFitas, char *prefixoSaida, int num
     for (int i = 0; i < quantFitas; i++) {
         Registro r;
         if (fread(&r, sizeof(Registro), 1, entrada[i]) != 1) {
+            dados->transferencias.leituras++;
             fitaEsgotada[i] = true;
             continue;
         }
@@ -39,7 +40,7 @@ void intercalaFitas(FILE *entrada[], int quantFitas, char *prefixoSaida, int num
         }
         //insere na memória (heap de nós) o registro lido e o índice que indica a fita em que foi lido
         NoHeap no = { r, i };
-        heapN = heapInsere(heap, heapN, no);//insere nó no heap e atualiza o tamanho do heap (heapN)
+        heapN = heapInsere(heap, heapN, no, dados);//insere nó no heap e atualiza o tamanho do heap (heapN)
     }
 
     //loop principal de intercalação
@@ -59,12 +60,13 @@ void intercalaFitas(FILE *entrada[], int quantFitas, char *prefixoSaida, int num
         }
 
         //retira o menor elemento da memória
-        NoHeap NoMinimo = heapRemove(heap, &heapN);
+        NoHeap NoMinimo = heapRemove(heap, &heapN, dados);
 
         //escreve na fita de saída atual
         sprintf(nomeArq, prefixoSaida, fitaSaida);
         FILE *fSaida = fopen(nomeArq, "ab");
         fwrite(&NoMinimo.reg, sizeof(Registro), 1, fSaida);
+        dados->transferencias.escritas++;
         fclose(fSaida);
 
         //le o próximo registro da mesma fita de onde veio o mínimo
@@ -72,8 +74,9 @@ void intercalaFitas(FILE *entrada[], int quantFitas, char *prefixoSaida, int num
         Registro prox;
 
         if (!fitaEsgotada[indiceFita] && fread(&prox, sizeof(Registro), 1, entrada[indiceFita]) == 1) {
+            dados->transferencias.leituras++;
             if (prox.nota == -1) {
-            
+
                 //leu curinga, esta fita terminou o bloco atual
                 //Marca como inativa NO BLOCO, mas não esgotada, pois pode ter mais blocos em seguida
                 ativosNoBloco[indiceFita] = false;
@@ -81,7 +84,7 @@ void intercalaFitas(FILE *entrada[], int quantFitas, char *prefixoSaida, int num
 
                 if (ativosNum == 0) {
                     //Todas as fitas terminaram este bloco
-                     
+
                     sprintf(nomeArq, prefixoSaida, fitaSaida);
                     FILE *fS = fopen(nomeArq, "ab");
                     //Fecha o bloco na saída com um curinga
@@ -90,7 +93,7 @@ void intercalaFitas(FILE *entrada[], int quantFitas, char *prefixoSaida, int num
 
                     //avança para a próxima fita de saída e
                     fitaSaida++;
-                    if (fitaSaida > numSaida) 
+                    if (fitaSaida > numSaida)
                         fitaSaida = 1;
 
                     //recarrega heap para o próximo bloco
@@ -99,10 +102,11 @@ void intercalaFitas(FILE *entrada[], int quantFitas, char *prefixoSaida, int num
 
                     //reinicia o bloco: relê os registros das fitas que ainda não estão esgotadas
                     for (int i = 0; i < quantFitas; i++) {
-                        if (fitaEsgotada[i]) 
+                        if (fitaEsgotada[i])
                             continue;
                         Registro r;
                         if (fread(&r, sizeof(Registro), 1, entrada[i]) != 1) {
+                            dados->transferencias.leituras++;
                             fitaEsgotada[i] = true;
                             continue;
                         }
@@ -113,7 +117,7 @@ void intercalaFitas(FILE *entrada[], int quantFitas, char *prefixoSaida, int num
                         ativosNoBloco[i] = true;
                         ativosNum++;
                         NoHeap no = { r, i };
-                        heapN = heapInsere(heap, heapN, no);
+                        heapN = heapInsere(heap, heapN, no, dados);
                     }
                 }
                 //se ainda há fitas ativas, continuamos o bloco sem reinserir nada
@@ -121,18 +125,18 @@ void intercalaFitas(FILE *entrada[], int quantFitas, char *prefixoSaida, int num
             else{
                 //registro normal: reinsere na heap
                 NoHeap no = { prox, indiceFita };
-                heapN = heapInsere(heap, heapN, no);
+                heapN = heapInsere(heap, heapN, no, dados);
             }
         }
         else{
-            //fread falhou: fita totalmente esgotada 
+            //fread falhou: fita totalmente esgotada
             fitaEsgotada[indiceFita]  = true;
             ativosNoBloco[indiceFita] = false;
-            if (ativosNum > 0) 
+            if (ativosNum > 0)
                 ativosNum--;
 
             if (ativosNum == 0 && heapN == 0) {
-                //Fecha o último bloco se ainda aberto 
+                //Fecha o último bloco se ainda aberto
                 sprintf(nomeArq, prefixoSaida, fitaSaida);
                 FILE *fS = fopen(nomeArq, "ab");
                 fwrite(&curinga, sizeof(Registro), 1, fS);
@@ -144,10 +148,10 @@ void intercalaFitas(FILE *entrada[], int quantFitas, char *prefixoSaida, int num
 
 //============================================================
 //IntercalacaoBalanceada
-//============================================================ 
+//============================================================
 
 void IntercalacaoBalanceada(FILE *arquivo, int quantidade, int situacao, int metodo, Dados *dados) {
-    
+
     int quantidadeBlocos;
     if(metodo == 1){
         //função de geração de blocos;
@@ -182,18 +186,18 @@ void IntercalacaoBalanceada(FILE *arquivo, int quantidade, int situacao, int met
             FILE *tmp[FITAS_ENTRADA];
             abrirFitasEntrada(tmp, 1);   /* 1 = apaga e reabre */
             fecharFitasIntercalacao(tmp);
-            
-            intercalaFitas(ponteiros, FITAS_ENTRADA, "fitas/entrada_%02d.bin", FITAS_ENTRADA);
+
+            intercalaFitas(ponteiros, FITAS_ENTRADA, "fitas/entrada_%02d.bin", FITAS_ENTRADA, dados);
         }
         else{
             //Lê das entradas, escreve nas saídas
             abrirFitasEntrada(ponteiros, 0);
-        
+
             FILE *tmp[FITAS_ENTRADA];
             abrirFitasSaida(tmp, 1);
             fecharFitasIntercalacao(tmp);
-        
-            intercalaFitas(ponteiros, FITAS_ENTRADA, "fitas/saida_%02d.bin", FITAS_ENTRADA);
+
+            intercalaFitas(ponteiros, FITAS_ENTRADA, "fitas/saida_%02d.bin", FITAS_ENTRADA, dados);
         }
 
         fecharFitasIntercalacao(ponteiros);
@@ -213,7 +217,7 @@ void IntercalacaoBalanceada(FILE *arquivo, int quantidade, int situacao, int met
 }
 
 //============================================================
-//Funções auxiliares  
+//Funções auxiliares
 //============================================================
 
 void fecharFitasIntercalacao(FILE *fitas[FITAS_ENTRADA]) {
@@ -226,7 +230,7 @@ void fecharFitasIntercalacao(FILE *fitas[FITAS_ENTRADA]) {
 }
 
 double calculaP(int blocos) {
-    if (blocos <= 1.0) 
+    if (blocos <= 1.0)
         return 0.0;
     return ceil(log(blocos) / log(FITAS_ENTRADA));
 }
@@ -242,7 +246,7 @@ void abrirFitasEntrada(FILE *fitasEntrada[FITAS_ENTRADA], int n) {
         fitasEntrada[i] = fopen(nomeArquivo, "rb");
         if (fitasEntrada[i] == NULL) {
             printf("Erro ao abrir %s\n", nomeArquivo);
-            for (int j = 0; j < i; j++) 
+            for (int j = 0; j < i; j++)
                 fclose(fitasEntrada[j]);
             return;
         }
@@ -253,14 +257,14 @@ void abrirFitasSaida(FILE *fitasSaida[FITAS_ENTRADA], int n) {
     char nomeArquivo[100];
     for (int i = 0; i < FITAS_ENTRADA; i++) {
         sprintf(nomeArquivo, "fitas/saida_%02d.bin", i + 1);
-        if (n == 1) { 
+        if (n == 1) {
             FILE *k = fopen(nomeArquivo, "wb");
             fclose(k);
         }
         fitasSaida[i] = fopen(nomeArquivo, "rb");
         if (fitasSaida[i] == NULL) {
             printf("Erro ao abrir %s\n", nomeArquivo);
-            for (int j = 0; j < i; j++) 
+            for (int j = 0; j < i; j++)
                 fclose(fitasSaida[j]);
             return;
         }
@@ -276,7 +280,7 @@ void trimFim(char *str) {
 int ObterNumCelOcupadas(Registro *Area) {
     int count = 0;
     for (int i = 0; i < TAM_MEMORIA; i++)
-        if (Area[i].numero != 0) 
+        if (Area[i].numero != 0)
             count++;
     return count;
 }
@@ -284,7 +288,7 @@ int ObterNumCelOcupadas(Registro *Area) {
 void InsereItem(Registro item, Registro *Area) {
     int n = ObterNumCelOcupadas(Area);
     int i = n - 1;
-    while (i >= 0 && Area[i].nota > item.nota){ 
+    while (i >= 0 && Area[i].nota > item.nota){
         Area[i + 1] = Area[i];
         i--;
     }
@@ -295,7 +299,7 @@ void RetiraPrimeiro(Registro *Area, Registro *R) {
     int n = ObterNumCelOcupadas(Area);
     if (n == 0) return;
     *R = Area[0];
-    for (int i = 0; i < n - 1; i++) 
+    for (int i = 0; i < n - 1; i++)
         Area[i] = Area[i + 1];
     Area[n-1].numero = 0;
     Area[n-1].nota = 0.0;
@@ -310,8 +314,8 @@ void RetiraUltimo(Registro *Area, Registro *R) {
     *R = Area[n-1];
     Area[n-1].numero = 0;
     Area[n-1].nota = 0.0;
-    strcpy(Area[n-1].estado, ""); 
-    strcpy(Area[n-1].cidade, ""); 
+    strcpy(Area[n-1].estado, "");
+    strcpy(Area[n-1].cidade, "");
     strcpy(Area[n-1].curso, "");
 }
 
@@ -334,7 +338,9 @@ int geraBlocosHeap(FILE *arquivo, int quantidade, Dados *dados) {
     curinga.estado[0] = '\0';
 
     Registro copia;
-    leRegistro(arquivo, &copia);
+    // leRegistro(arquivo, &copia); -> Não há necessidade de reler o texto já que o binário foi gerado
+    fread(&copia, sizeof(Registro), 1, arquivo);
+    dados->transferencias.leituras++;
 
     // a variável i representa a posiçao no vetor em memória principal
     int i = 0;
@@ -348,34 +354,36 @@ int geraBlocosHeap(FILE *arquivo, int quantidade, Dados *dados) {
         registros[i] = copia;
 
         if (i == 19) {
-            if (w == FITAS_ENTRADA + 1) 
+            if (w == FITAS_ENTRADA + 1)
                 w = 1;
 
-            HeapSort(registros, 20);
+            HeapSort(registros, 20, dados);
 
             sprintf(nomeArquivo, "fitas/entrada_%02d.bin", w);
             FILE *fita = fopen(nomeArquivo, "ab");
             fwrite(registros, sizeof(Registro), 20, fita);
             fwrite(&curinga,  sizeof(Registro), 1,  fita);
+            dados->transferencias.escritas++;
             fclose(fita);
 
             w++;
             i = 0;
             blocosGerados++;
-        } 
+        }
         else{
             i++;
         }
         contador++;
-    } while (leRegistro(arquivo, &copia) && contador < quantidade);
+    } while (fread(&copia, sizeof(Registro), 1, arquivo) && dados->transferencias.leituras++ && contador < quantidade); // leRegistro(arquivo, &copia); -> Não há necessidade de reler o texto já que o binário foi gerado
 
     // ultimo bloco(quantidade não múltipla de m)
     if (i != 0) {
-        HeapSort(registros, i);
+        HeapSort(registros, i, dados);
         sprintf(nomeArquivo, "fitas/entrada_%02d.bin", w);
         FILE *fita = fopen(nomeArquivo, "ab");
         fwrite(registros, sizeof(Registro), i,  fita);
         fwrite(&curinga,  sizeof(Registro), 1,  fita);
+        dados->transferencias.escritas++;
         fclose(fita);
         blocosGerados++;
     }

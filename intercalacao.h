@@ -3,6 +3,7 @@
 #include "registro.h"
 #include "fitas.h"
 #include "heap.h"
+#include "intercalacaoSub.h"
 
 #include <math.h>
 #include<stdbool.h>
@@ -18,6 +19,7 @@
 // int ChamarCriadorFitas();
 // void fecharFitas(FILE* entrada[FITAS_ENTRADA], FILE* saida[FITAS_SAIDA]);
 // bool criarFitas(FILE* entrada[FITAS_ENTRADA], FILE* saida[FITAS_SAIDA]);
+void intercalaFitas(FILE *entrada[], int quantFitas, char *prefixoSaida, int numSaida, Dados *dados);
 void abrirFitasSaida(FILE* fitasSaida[FITAS_ENTRADA], int n);
 void abrirFitasEntrada(FILE* fitasEntrada[FITAS_ENTRADA], int n);
 int indiceMenorRegistro(Registro v[], int n, bool ativos[20]);

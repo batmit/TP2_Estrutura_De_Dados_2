@@ -39,7 +39,7 @@ void RegistroPrint(Registro item);
 
 bool leRegistro(FILE* arquivo, Registro* reg);
 
-COMP RegistroCompara(Registro i1, Registro i2);
+COMP RegistroCompara(Registro i1, Registro i2, Dados *dados);
 
 FILE* criaArquivoBinario(FILE* arquivoTexto, const char* nomeArquivoBinario, Dados* dados);
 FILE* criaArquivoSaida(FILE* arquivoBinario, const char* nomeArquivoSaida);

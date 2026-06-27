@@ -9,14 +9,14 @@ typedef struct {
     bool marcado;//valor marcado é sempre maior que o valor não marcado, valor marcado entra no proximo bloco
 } Item;
 
-void HeapConstroiSub(Item *v, int n);
-void HeapRefazSub(Item *v, int l, int r);
-Item HeapRemoveSub(Item *h, int *n);
+void HeapConstroiSub(Item *v, int n, Dados *dados);
+void HeapRefazSub(Item *v, int l, int r, Dados *dados);
+Item HeapRemoveSub(Item *h, int *n, Dados *dados);
 
 void HeapInsereSub(Item *h, Item novo);
 void HeapSobeSub(Item *h, int i);
 
-COMP ItemCompara(Item r1, Item r2);
+COMP ItemCompara(Item r1, Item r2, Dados *dados);
 
 bool novoBloco(Item *v, int  n);
 void desmarcaElementos(Item* v, int n);
@@ -25,6 +25,6 @@ void transformaEmRegistro(Item i, Registro* r);
 
 int geraBlocosSubstituicao(FILE* arquivo, int quantidade, Dados *dados);
 
-bool leItem(FILE* arquivo, Item* reg);
+bool leItem(FILE* arquivo, Item* reg, Dados *dados);
 
 #endif

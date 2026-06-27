@@ -1,7 +1,8 @@
 #include "registro.h"
 
-COMP RegistroCompara(Registro r1, Registro r2) {
-    
+COMP RegistroCompara(Registro r1, Registro r2, Dados *dados) {
+    dados->comparacoes++;
+
     if (r1.nota < r2.nota)
         return MENOR;
     else if (r1.nota > r2.nota)
@@ -24,24 +25,24 @@ bool leRegistro(FILE* arquivo, Registro* reg) {
 
     //le uma linha inteira
     if (fgets(linha, sizeof(linha), arquivo) != NULL) {
-    
+
         char numero[9];//numero tem 8 caracteres + \0 (ex: "00670838 + \0")
         char nota[6];//nota tem 5 caracteres + \0 (ex: "06.70 + \0")
 
         // strncpy(destino, origem[posicao_inicial], qtd_caracteres)
-        
+
         //numero (colunas 1 a 8 -> posição 0, tamanho 8)
-        strncpy(numero, &linha[0], 8); 
+        strncpy(numero, &linha[0], 8);
         numero[8] = '\0';//insere o \0 no fim da string
         reg->numero = atol(numero);//converte para long
 
         //nota (colunas 10 a 14 -> posição 9, tamanho 5)
-        strncpy(nota, &linha[9], 5); 
+        strncpy(nota, &linha[9], 5);
         nota[5] = '\0';//insere o \0 no fim da string
         reg->nota = atof(nota);//converte para float
 
         //estado (colunas 16 e 17 -> posição 15, tamanho 2)
-        strncpy(reg->estado, &linha[15], 2); 
+        strncpy(reg->estado, &linha[15], 2);
         reg->estado[2] = '\0';
 
         // Cidade (Colunas 19 a 68 -> posição 18, tamanho 50)
@@ -49,9 +50,9 @@ bool leRegistro(FILE* arquivo, Registro* reg) {
         reg->cidade[50] = '\0';
 
         // Curso (Colunas 70 a 99 -> posição 69, tamanho 30)
-        strncpy(reg->curso, &linha[69], 30); 
+        strncpy(reg->curso, &linha[69], 30);
         reg->curso[30] = '\0';
-        
+
         return true;
     }
     return false;
@@ -79,6 +80,7 @@ FILE* criaArquivoBinario(FILE* arquivoTexto, const char* nomeArquivoBinario, Dad
     }
 
     fclose(arquivoBinario);
+    fclose(arquivoTexto);
     return fopen(nomeArquivoBinario, "rb");
 }
 
