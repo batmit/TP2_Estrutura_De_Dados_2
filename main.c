@@ -97,7 +97,7 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
 
     if(argc == 5 && strcmp(argv[4], "-P") == 0){
         printf("\n=== RESULTADO DA ORDENAÇÃO ===\n");
-        FILE* arquivo = fopen("Resultado.txt", "rb");
+        FILE* arquivo = fopen("Resultado.txt", "r");
         if (arquivo == NULL) {
             printf("Erro ao abrir Resultado.txt\n");
             return 1;
