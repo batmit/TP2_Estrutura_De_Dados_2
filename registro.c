@@ -61,10 +61,13 @@ bool leRegistro(FILE* arquivo, Registro* reg) {
     return false;
 }
 
-void imprimirRegistros(FILE* arquivo){
+void imprimirRegistros(FILE* arquivo, int quantidade){
     Registro reg;
-    while(fread(&reg, sizeof(Registro), 1, arquivo))
+    int i=0;
+    while(leRegistro(arquivo,&reg) && i<quantidade){
         RegistroPrint(reg);
+        i++;
+    }
 }
 
 //transforma o arquivo texto em binario para facilitar a leitura e escrita durante os processos de ordenação
@@ -105,10 +108,16 @@ FILE* criaArquivoSaida(FILE* arquivoBinario, const char* nomeArquivoSaida) {
 }
 
 // Função de preparação
-void prepararBinario(const char* arquivo, int quantidade, int situacao) {
-    FILE *arq = fopen(arquivo, "rb+");
+void prepararTexto(const char* arquivo, const char* arquivoOrdenado, int quantidade, int situacao) {
+    FILE *arq = fopen(arquivo, "r");
     if (!arq) {
         printf("Erro ao abrir %s para preparação.\n", arquivo);
+        return;
+    }
+
+    FILE *arqOrd = fopen(arquivoOrdenado, "w");
+    if (!arq) {
+        printf("Erro ao abrir %s para preparação.\n", arquivoOrdenado);
         return;
     }
 
@@ -116,11 +125,16 @@ void prepararBinario(const char* arquivo, int quantidade, int situacao) {
     if (!vetor) {
         printf("Erro de alocação de memória na preparação.\n");
         fclose(arq);
+        fclose(arqOrd);
         return;
     }
 
-    // Lê a quantidade exata de registros do ficheiro binário base
-    int lidos = fread(vetor, sizeof(Registro), quantidade, arq);
+    // Lê a quantidade exata de registros do ficheiro base
+    int lidos = 0;
+    while (lidos < quantidade && !feof(arq)) {
+        if (leRegistro(arq, &vetor[lidos])) lidos++;
+        else break;
+    }
 
     // Se a situação for 1 (Crescente) ou 2 (Decrescente), ordena o vetor na memória
     if (situacao == 1 || situacao == 2) {
@@ -146,9 +160,16 @@ void prepararBinario(const char* arquivo, int quantidade, int situacao) {
         }
     }
 
-    fseek(arq, 0, SEEK_SET);
-    fwrite(vetor, sizeof(Registro), lidos, arq);
+    for (int i = 0; i < lidos; i++) {
+        fprintf(arqOrd, "%08ld %05.2f %s %s %s\n",
+                vetor[i].numero,
+                vetor[i].nota,
+                vetor[i].estado,
+                vetor[i].cidade,
+                vetor[i].curso);
+    }
 
     free(vetor);
     fclose(arq);
+    fclose(arqOrd);
 }

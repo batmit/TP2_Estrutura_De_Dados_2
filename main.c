@@ -24,7 +24,9 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
 
     clock_t inicio, fim;
 
-    FILE* base = fopen("PROVAO.TXT", "r");
+    prepararTexto("PROVAO.TXT", "PROVAO_preparado.txt", atoi(argv[2]), atoi(argv[3]));
+
+    FILE* base = fopen("PROVAO_preparado.txt", "r");
     if (!base) {
         printf("Erro ao abrir o arquivo.\n");
         return 1;
@@ -36,8 +38,15 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
         return 1;
     }
 
-    if(atoi(argv[3]) != 3) // Ordena se não for aleatório
-        prepararBinario("PROVAO.bin", atoi(argv[2])+1, atoi(argv[3]));
+    if(argc == 5 && strcmp(argv[4], "-P") == 0) {
+        printf("=== DADOS A SEREM ORDENADOS ===\n");
+        FILE* arquivo = fopen("PROVAO_preparado.txt", "r");
+        if (arquivo == NULL) {
+            printf("Erro ao abrir PROVAO_preparado.txt\n");
+            return 1;
+        }
+        imprimirRegistros(arquivo, atoi(argv[2])+1);
+    }
 
     if(atoi(argv[1]) == 1 || atoi(argv[1]) == 2){//Intercalação Balanceada de 2f caminhos
         inicio = clock();
@@ -69,14 +78,32 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
         }
         QuickSortExterno(&Li, &Ei, &LEs, 1, atoi(argv[2]), &dados);
         fim = clock();
+        fclose(Li);
+        fclose(Ei);
+        fclose(LEs);
+
+        FILE* bin = fopen("PROVAO.bin", "rb");
+        if(!bin){
+            printf("Error ao ler o arquivo PROVAO.bin");
+            return 1;
+        }
+
+        criaArquivoSaida(bin, "Resultado.txt");
     }
     else{
         printf("Metodo de busca desconhecido: %s\n", argv[1]);
         return 1;
     }
 
-    if(argc == 5 && strcmp(argv[4], "-P") == 0)
-        imprimirRegistros(arquivoBinario);
+    if(argc == 5 && strcmp(argv[4], "-P") == 0){
+        printf("\n=== RESULTADO DA ORDENAÇÃO ===\n");
+        FILE* arquivo = fopen("Resultado.txt", "rb");
+        if (arquivo == NULL) {
+            printf("Erro ao abrir Resultado.txt\n");
+            return 1;
+        }
+        imprimirRegistros(arquivo, atoi(argv[2])+1);
+    }
 
     printf("----------------------------\n");
     printf("Criacao do arquivo binario:\n");

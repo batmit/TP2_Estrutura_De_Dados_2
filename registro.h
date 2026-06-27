@@ -34,7 +34,7 @@ typedef struct dados{
 } Dados;
 
 
-void imprimirRegistros(FILE* arquivo);
+void imprimirRegistros(FILE* arquivo, int quantidade);
 void RegistroPrint(Registro item);
 
 bool leRegistro(FILE* arquivo, Registro* reg);
@@ -44,6 +44,6 @@ COMP RegistroCompara(Registro i1, Registro i2, Dados *dados);
 FILE* criaArquivoBinario(FILE* arquivoTexto, const char* nomeArquivoBinario, Dados* dados);
 FILE* criaArquivoSaida(FILE* arquivoBinario, const char* nomeArquivoSaida);
 
-void prepararBinario(const char* arquivo, int quantidade, int situacao);
+void prepararTexto(const char* arquivo, const char* arquivoOrdenado, int quantidade, int situacao);
 
 #endif
