@@ -81,13 +81,12 @@ void Particao(FILE **ArqLi, FILE **ArqEi, FILE **ArqLEs, Registro* Area, int Esq
     Registro UltLido, R;
 
     fseek(*ArqLi, (Li - 1) * sizeof(Registro), SEEK_SET);
-    fseek(*ArqEi, (Ls - 1) * sizeof(Registro), SEEK_SET);
+    fseek(*ArqEi, (Ei - 1) * sizeof(Registro), SEEK_SET);
     *i = Esq - 1;
     *j = Dir + 1;
 
     while(Ls >= Li){
         dados->comparacoes++;
-        dados->transferencias.leituras++;
         if(NRArea < TAM_MEMORIA - 1){
             dados->transferencias.leituras++;
             if(OndeLer)
@@ -97,6 +96,7 @@ void Particao(FILE **ArqLi, FILE **ArqEi, FILE **ArqLEs, Registro* Area, int Esq
             InserirArea(Area, &UltLido, &NRArea);
             continue;
         }
+        dados->transferencias.leituras++;
         dados->comparacoes++;
         if(Ls == Es)
             LeSup (ArqLEs, &UltLido, &Ls, &OndeLer);

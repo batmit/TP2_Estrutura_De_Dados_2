@@ -180,6 +180,7 @@ int geraBlocosSubstituicao(FILE* arquivo, int quantidade, Dados *dados) {
 
     //fecha o último bloco aberto
     fwrite(&curinga, sizeof(Registro), 1, fita);
+    dados->transferencias.escritas++;
     blocosGerados++;
     fclose(fita);
 

@@ -29,10 +29,10 @@ void intercalaFitas(FILE *entrada[], int quantFitas, char *prefixoSaida, int num
     for (int i = 0; i < quantFitas; i++) {
         Registro r;
         if (fread(&r, sizeof(Registro), 1, entrada[i]) != 1) {
-            dados->transferencias.leituras++;
             fitaEsgotada[i] = true;
             continue;
         }
+        dados->transferencias.leituras++;
         if (r.nota == -1) {
             //Curinga logo no início: fita tem apenas blocos já consumidos antes
             fitaEsgotada[i] = true;
@@ -89,6 +89,7 @@ void intercalaFitas(FILE *entrada[], int quantFitas, char *prefixoSaida, int num
                     FILE *fS = fopen(nomeArq, "ab");
                     //Fecha o bloco na saída com um curinga
                     fwrite(&curinga, sizeof(Registro), 1, fS);
+                    dados->transferencias.escritas++;
                     fclose(fS);
 
                     //avança para a próxima fita de saída e
@@ -106,10 +107,10 @@ void intercalaFitas(FILE *entrada[], int quantFitas, char *prefixoSaida, int num
                             continue;
                         Registro r;
                         if (fread(&r, sizeof(Registro), 1, entrada[i]) != 1) {
-                            dados->transferencias.leituras++;
                             fitaEsgotada[i] = true;
                             continue;
                         }
+                        dados->transferencias.leituras++;
                         if (r.nota == -1) {
                             fitaEsgotada[i] = true;
                             continue;
@@ -140,6 +141,7 @@ void intercalaFitas(FILE *entrada[], int quantFitas, char *prefixoSaida, int num
                 sprintf(nomeArq, prefixoSaida, fitaSaida);
                 FILE *fS = fopen(nomeArq, "ab");
                 fwrite(&curinga, sizeof(Registro), 1, fS);
+                dados->transferencias.escritas++;
                 fclose(fS);
             }
         }
@@ -362,6 +364,7 @@ int geraBlocosHeap(FILE *arquivo, int quantidade, Dados *dados) {
             sprintf(nomeArquivo, "fitas/entrada_%02d.bin", w);
             FILE *fita = fopen(nomeArquivo, "ab");
             fwrite(registros, sizeof(Registro), 20, fita);
+            dados->transferencias.escritas++;
             fwrite(&curinga,  sizeof(Registro), 1,  fita);
             dados->transferencias.escritas++;
             fclose(fita);
@@ -382,6 +385,7 @@ int geraBlocosHeap(FILE *arquivo, int quantidade, Dados *dados) {
         sprintf(nomeArquivo, "fitas/entrada_%02d.bin", w);
         FILE *fita = fopen(nomeArquivo, "ab");
         fwrite(registros, sizeof(Registro), i,  fita);
+        dados->transferencias.escritas++; 
         fwrite(&curinga,  sizeof(Registro), 1,  fita);
         dados->transferencias.escritas++;
         fclose(fita);
