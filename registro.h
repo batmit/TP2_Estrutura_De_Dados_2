@@ -42,7 +42,7 @@ bool leRegistro(FILE* arquivo, Registro* reg);
 COMP RegistroCompara(Registro i1, Registro i2, Dados *dados);
 
 FILE* criaArquivoBinario(FILE* arquivoTexto, const char* nomeArquivoBinario, Dados* dados);
-FILE* criaArquivoSaida(FILE* arquivoBinario, const char* nomeArquivoSaida);
+void criaArquivoSaida(FILE* arquivoBinario, const char* nomeArquivoSaida);
 
 void prepararTexto(const char* arquivo, const char* arquivoOrdenado, int quantidade, int situacao);
 

@@ -3,16 +3,16 @@
 
 #include "registro.h"
 
-void QuickSortExterno(FILE **Li, FILE **Ei, FILE **LEs, int Esq, int Dir, Dados *dados);
+void QuickSortExterno(FILE **Li, FILE **Ei, FILE **LEs, double Esq, double Dir, Dados *dados);
 void FAVazia(Registro* Area);
-void LeSup(FILE** ArqLEs, Registro* UltLido, int *Ls, bool *OndeLer);
-void LeInf(FILE** ArqLi, Registro* UltLido, int* Li, bool *OndeLer);
+void LeSup(FILE** ArqLEs, Registro* UltLido, double *Ls, bool *OndeLer);
+void LeInf(FILE** ArqLi, Registro* UltLido, double* Li, bool *OndeLer);
 void InserirArea(Registro* Area, Registro* UltLido, int *NRArea);
-void EscreveMax(FILE **ArqLEs, Registro R, int *Es);
-void EscreveMin(FILE **ArqEi, Registro R, int *Ei);
+void EscreveMax(FILE **ArqLEs, Registro R, double *Es);
+void EscreveMin(FILE **ArqEi, Registro R, double *Ei);
 void RetiraMax(Registro* Area, Registro* R, int *NRArea);
 void RetiraMin(Registro* Area, Registro* R, int *NRArea);
-void Particao(FILE **ArqLi, FILE **ArqEi, FILE **ArqLEs, Registro* Area, int Esq, int Dir, int *i, int *j, Dados *dados);
+void Particao(FILE **ArqLi, FILE **ArqEi, FILE **ArqLEs, Registro* Area, double Esq, double Dir, double *i, double *j, Dados *dados);
 // Funções que faltam
 int ObterNumCelOcupadas(Registro* Area);
 void InsereItem(Registro item, Registro* Area);

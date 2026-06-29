@@ -5,6 +5,8 @@
 #include "intercalacao.h"
 #include "quicksort.h"
 
+#define TAM_BUFFER_QS 262144
+
 int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> [-P]
 
     if(argc != 4 && argc != 5){
@@ -27,6 +29,7 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
     prepararTexto("PROVAO.TXT", "PROVAO_preparado.txt", atoi(argv[2]), atoi(argv[3]));
 
     FILE* base = fopen("PROVAO_preparado.txt", "r");
+    // FILE* base = fopen("PROVAO.txt", "r");
     if (!base) {
         printf("Erro ao abrir o arquivo.\n");
         return 1;
@@ -46,6 +49,7 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
             return 1;
         }
         imprimirRegistros(arquivo, atoi(argv[2])+1);
+        fclose(arquivo);
     }
 
     if(atoi(argv[1]) == 1 || atoi(argv[1]) == 2){//Intercalação Balanceada de 2f caminhos
@@ -56,10 +60,10 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
             return 1;
         }
         IntercalacaoBalanceada(arquivo, atoi(argv[2]) + 1, atoi(argv[1]), &dados);
+        fclose(arquivo);
         fim = clock();
     }
     else if(atoi(argv[1]) == 3){//QuickSort Externo
-        inicio = clock();
         //inicia os apontadores para o arquivo
         FILE *Li = fopen("PROVAO.bin", "r+b");
         if(!Li) {
@@ -76,11 +80,29 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
             printf("Erro ao criar o arquivo LEs.bin.\n");
             return 1;
         }
+
+        // Cria os buffers na RAM
+        char *bufLi = (char*)malloc(TAM_BUFFER_QS);
+        char *bufEi = (char*)malloc(TAM_BUFFER_QS);
+        char *bufLEs = (char*)malloc(TAM_BUFFER_QS);
+
+        if (bufLi && bufEi && bufLEs) {
+            // Associa os super buffers aos arquivos de forma totalmente em bloco (_IOFBF)
+            setvbuf(Li, bufLi, _IOFBF, TAM_BUFFER_QS);
+            setvbuf(Ei, bufEi, _IOFBF, TAM_BUFFER_QS);
+            setvbuf(LEs, bufLEs, _IOFBF, TAM_BUFFER_QS);
+        }
+
+        inicio = clock();
         QuickSortExterno(&Li, &Ei, &LEs, 1, atoi(argv[2]), &dados);
         fim = clock();
         fclose(Li);
         fclose(Ei);
         fclose(LEs);
+
+        free(bufLi);
+        free(bufEi);
+        free(bufLEs);
 
         FILE* bin = fopen("PROVAO.bin", "rb");
         if(!bin){
@@ -89,6 +111,7 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
         }
 
         criaArquivoSaida(bin, "Resultado.txt");
+        fclose(bin);
     }
     else{
         printf("Metodo de busca desconhecido: %s\n", argv[1]);
@@ -103,7 +126,10 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
             return 1;
         }
         imprimirRegistros(arquivo, atoi(argv[2])+1);
+        fclose(arquivo);
     }
+
+    fclose(arquivoBinario);
 
     printf("----------------------------\n");
     printf("Criacao do arquivo binario:\n");
@@ -118,8 +144,6 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
     printf("Transferencias na escrita: %d\n", dados.transferencias.escritas);
 
     printf("----------------------------\n");
-
-
 
 
     return 0;

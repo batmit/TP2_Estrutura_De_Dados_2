@@ -1,5 +1,5 @@
 #include "registro.h"
-#include "heap.h"
+#include "intercalacao.h"
 #include <stdio.h>
 
 COMP RegistroCompara(Registro r1, Registro r2, Dados *dados) {
@@ -25,6 +25,10 @@ void RegistroPrint(Registro item) {
 //realiza a leitura de uma linha inteira, particiona os campos e preenche a struct Registro
 bool leRegistro(FILE* arquivo, Registro* reg) {
     char linha[110];//guarda uma linha inteira
+
+    if (reg != NULL) {
+        memset(reg, 0, sizeof(*reg));
+    }
 
     //le uma linha inteira
     if (fgets(linha, sizeof(linha), arquivo) != NULL) {
@@ -91,23 +95,22 @@ FILE* criaArquivoBinario(FILE* arquivoTexto, const char* nomeArquivoBinario, Dad
 }
 
 //retorna os registros do arquivo binário para um arquivo texto de saída, mantendo a formatação original do arquivo PROVAO.txt
-FILE* criaArquivoSaida(FILE* arquivoBinario, const char* nomeArquivoSaida) {
+void criaArquivoSaida(FILE* arquivoBinario, const char* nomeArquivoSaida) {
     FILE* arquivoSaida = fopen(nomeArquivoSaida, "wb");
     if (!arquivoSaida) {
         printf("Erro ao criar o arquivo de saída.\n");
-        return NULL;
+        return;
     }
 
     Registro reg;
     while (fread(&reg, sizeof(Registro), 1, arquivoBinario) && reg.nota != -1) {
-        fprintf(arquivoSaida, "%08ld %05.2f %s %s %s\n", reg.numero, reg.nota, reg.estado, reg.cidade, reg.curso);
+        fprintf(arquivoSaida, "%08ld %05.1f %s %s %s\n", reg.numero, reg.nota, reg.estado, reg.cidade, reg.curso);
     }
 
     fclose(arquivoSaida);
-    return fopen(nomeArquivoSaida, "rb");
 }
 
-// Função de preparação
+// Função de preparação usando intercalação externa com seleção por substituição
 void prepararTexto(const char* arquivo, const char* arquivoOrdenado, int quantidade, int situacao) {
     FILE *arq = fopen(arquivo, "r");
     if (!arq) {
@@ -116,60 +119,135 @@ void prepararTexto(const char* arquivo, const char* arquivoOrdenado, int quantid
     }
 
     FILE *arqOrd = fopen(arquivoOrdenado, "w");
-    if (!arq) {
+    if (!arqOrd) {
         printf("Erro ao abrir %s para preparação.\n", arquivoOrdenado);
+        fclose(arq);
         return;
     }
 
-    Registro *vetor = (Registro*) malloc(quantidade * sizeof(Registro));
-    if (!vetor) {
-        printf("Erro de alocação de memória na preparação.\n");
+    char nomeTemporario[256];
+    snprintf(nomeTemporario, sizeof(nomeTemporario), "%s.tmp.bin", arquivoOrdenado);
+
+    FILE *arqTmp = fopen(nomeTemporario, "wb");
+    if (!arqTmp) {
+        printf("Erro ao criar o arquivo temporário para preparação.\n");
         fclose(arq);
         fclose(arqOrd);
         return;
     }
 
-    // Lê a quantidade exata de registros do ficheiro base
     int lidos = 0;
-    while (lidos < quantidade && !feof(arq)) {
-        if (leRegistro(arq, &vetor[lidos])) lidos++;
-        else break;
+    Registro reg;
+    while (lidos < quantidade && leRegistro(arq, &reg)) {
+        fwrite(&reg, sizeof(Registro), 1, arqTmp);
+        lidos++;
     }
 
-    // Se a situação for 1 (Crescente) ou 2 (Decrescente), ordena o vetor na memória
-    if (situacao == 1 || situacao == 2) {
-        // Insertion Sort
-        for (int i = 1; i < lidos; i++) {
-            Registro pivo = vetor[i];
-            int j = i - 1;
-
-            if (situacao == 1) {
-                // Ordenação Crescente: move os elementos maiores para a direita
-                while (j >= 0 && vetor[j].nota > pivo.nota) {
-                    vetor[j + 1] = vetor[j];
-                    j--;
-                }
-            } else {
-                // Ordenação Decrescente: move os elementos menores para a direita
-                while (j >= 0 && vetor[j].nota < pivo.nota) {
-                    vetor[j + 1] = vetor[j];
-                    j--;
-                }
-            }
-            vetor[j + 1] = pivo;
-        }
-    }
-
-    for (int i = 0; i < lidos; i++) {
-        fprintf(arqOrd, "%08ld %05.2f %s %s %s\n",
-                vetor[i].numero,
-                vetor[i].nota,
-                vetor[i].estado,
-                vetor[i].cidade,
-                vetor[i].curso);
-    }
-
-    free(vetor);
     fclose(arq);
+    fclose(arqTmp);
+
+    if (lidos > 0 && (situacao == 1 || situacao == 2)) {
+        Dados dados = {0};
+        FILE *arquivoBinario = fopen(nomeTemporario, "rb");
+        if (!arquivoBinario) {
+            printf("Erro ao abrir o arquivo temporário para ordenação externa.\n");
+            fclose(arqOrd);
+            remove(nomeTemporario);
+            return;
+        }
+
+        remove("Resultado.txt");
+        IntercalacaoBalanceada(arquivoBinario, lidos, 2, &dados);
+        fclose(arquivoBinario);
+
+        FILE *resultado = fopen("Resultado.txt", "r");
+        if (!resultado) {
+            printf("Erro ao abrir o arquivo de resultado da intercalação.\n");
+            fclose(arqOrd);
+            remove(nomeTemporario);
+            return;
+        }
+
+        char **linhas = NULL;
+        int qtdLinhas = 0;
+        char buffer[256];
+
+        while (fgets(buffer, sizeof(buffer), resultado) != NULL) {
+            size_t len = strlen(buffer);
+            if (len > 0 && buffer[len - 1] == '\n') {
+                buffer[--len] = '\0';
+            }
+
+            char *linha = (char *)malloc(len + 1);
+            if (!linha) {
+                for (int i = 0; i < qtdLinhas; i++) {
+                    free(linhas[i]);
+                }
+                free(linhas);
+                fclose(resultado);
+                fclose(arqOrd);
+                remove(nomeTemporario);
+                return;
+            }
+
+            strcpy(linha, buffer);
+            char **novo = (char **)realloc(linhas, (qtdLinhas + 1) * sizeof(char *));
+            if (!novo) {
+                free(linha);
+                for (int i = 0; i < qtdLinhas; i++) {
+                    free(linhas[i]);
+                }
+                free(linhas);
+                fclose(resultado);
+                fclose(arqOrd);
+                remove(nomeTemporario);
+                return;
+            }
+
+            linhas = novo;
+            linhas[qtdLinhas++] = linha;
+        }
+
+        fclose(resultado);
+
+        if (situacao == 2) {
+            for (int i = qtdLinhas - 1; i >= 0; i--) {
+                fputs(linhas[i], arqOrd);
+                fputc('\n', arqOrd);
+                free(linhas[i]);
+            }
+        } else {
+            for (int i = 0; i < qtdLinhas; i++) {
+                fputs(linhas[i], arqOrd);
+                fputc('\n', arqOrd);
+                free(linhas[i]);
+            }
+        }
+
+        free(linhas);
+    } else {
+        FILE *arqTexto = fopen(arquivo, "r");
+        if (!arqTexto) {
+            printf("Erro ao abrir %s para cópia.\n", arquivo);
+            fclose(arqOrd);
+            remove(nomeTemporario);
+            return;
+        }
+
+        int escritos = 0;
+        while (escritos < quantidade && leRegistro(arqTexto, &reg)) {
+            fprintf(arqOrd, "%08ld %05.1f %s %s %s\n",
+                    reg.numero,
+                    reg.nota,
+                    reg.estado,
+                    reg.cidade,
+                    reg.curso);
+            escritos++;
+        }
+
+        fclose(arqTexto);
+    }
+
     fclose(arqOrd);
+    remove(nomeTemporario);
 }

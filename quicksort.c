@@ -1,13 +1,13 @@
 #include "quicksort.h"
-
-void QuickSortExterno(FILE **Li, FILE **Ei, FILE **LEs, int Esq, int Dir, Dados *dados){
-    int i, j;
+#include <string.h>
+void QuickSortExterno(FILE **Li, FILE **Ei, FILE **LEs, double Esq, double Dir, Dados *dados){
+    double i, j;
     Registro Area[TAM_MEMORIA];
 
     if(Dir - Esq < 1)
         return;
 
-    FAVazia(Area); // O vetor já é um pointeiro
+    FAVazia(Area); // O vetor já é um ponteiro
     Particao(Li, Ei, LEs, Area, Esq, Dir, &i, &j, dados);
 
     if (i - Esq < Dir - j) {
@@ -20,68 +20,88 @@ void QuickSortExterno(FILE **Li, FILE **Ei, FILE **LEs, int Esq, int Dir, Dados 
 }
 
 void FAVazia(Registro* Area){
-    for(int i = 0; i < TAM_MEMORIA; i++){
-        Area[i].numero = 0;
-        Area[i].nota = 0.0;
-        strcpy(Area[i].estado, "");
-        strcpy(Area[i].cidade, "");
-        strcpy(Area[i].curso, "");
-    }
+    memset(Area, 0, sizeof(Registro) * TAM_MEMORIA);
 }
 
-void LeSup(FILE** ArqLEs, Registro* UltLido, int *Ls, bool *OndeLer){
-    fseek(*ArqLEs, (*Ls - 1) * sizeof(Registro), SEEK_SET);
+void LeSup(FILE** ArqLEs, Registro* UltLido, double *Ls, bool *OndeLer){
+    fseek(*ArqLEs, (long)((*Ls - 1) * sizeof(Registro)), SEEK_SET);
     fread(UltLido, sizeof(Registro), 1, *ArqLEs);
     (*Ls)--;
     *OndeLer = false;
 }
 
-void LeInf(FILE** ArqLi, Registro* UltLido, int* Li, bool *OndeLer){
+void LeInf(FILE** ArqLi, Registro* UltLido, double* Li, bool *OndeLer){
     fread(UltLido, sizeof(Registro), 1, *ArqLi);
     (*Li)++;
     *OndeLer = true;
 }
 
 void InserirArea(Registro* Area, Registro* UltLido, int *NRArea){
-    InsereItem(*UltLido, Area);
-    *NRArea = ObterNumCelOcupadas(Area);
+    int i = *NRArea - 1;
+    
+    // Busca a posição correta para manter a ordenação interna
+    while (i >= 0 && Area[i].nota > UltLido->nota) {
+        i--;
+    }
+    
+    // Desloca TODOS os elementos maiores de uma só vez usando o memmove
+    if (i + 1 < *NRArea) {
+        memmove(&Area[i + 2], &Area[i + 1], (*NRArea - (i + 1)) * sizeof(Registro));
+    }
+    
+    Area[i + 1] = *UltLido;
+    (*NRArea)++; // Apenas incrementa a variável já rastreada (elimina o O(N) de contagem)
 }
 
-void EscreveMax(FILE **ArqLEs, Registro R, int *Es){
-    fseek(*ArqLEs, (*Es - 1) * sizeof(Registro), SEEK_SET);
+void EscreveMax(FILE **ArqLEs, Registro R, double *Es){
+    fseek(*ArqLEs, (long)((*Es - 1) * sizeof(Registro)), SEEK_SET);
     fwrite(&R, sizeof(Registro), 1, *ArqLEs);
     (*Es)--;
 }
 
-void EscreveMin(FILE **ArqEi, Registro R, int *Ei){
+void EscreveMin(FILE **ArqEi, Registro R, double *Ei){
     fwrite(&R, sizeof(Registro), 1, *ArqEi);
     (*Ei)++;
 }
 
 void RetiraMax(Registro* Area, Registro* R, int *NRArea){
-    RetiraUltimo(Area, R);
-    *NRArea = ObterNumCelOcupadas(Area);
+    if (*NRArea == 0)
+        return;
+    
+    *R = Area[*NRArea - 1]; // O máximo é sempre o último elemento atual
+    
+    (*NRArea)--; // Apenas decrementa a variável
 }
 
 void RetiraMin(Registro* Area, Registro* R, int *NRArea){
-    RetiraPrimeiro(Area, R);
-    *NRArea = ObterNumCelOcupadas(Area);
+    if (*NRArea == 0)
+        return;
+    
+    *R = Area[0]; // O mínimo é sempre o primeiro elemento
+    (*NRArea)--; 
+    
+    // Puxa TODOS os elementos restantes para a esquerda de uma só vez
+    if (*NRArea > 0) 
+        memmove(&Area[0], &Area[1], (*NRArea) * sizeof(Registro));
+    
+    // Limpa a última célula restante
+    memset(&Area[*NRArea], 0, sizeof(Registro));
 }
 
-void Particao(FILE **ArqLi, FILE **ArqEi, FILE **ArqLEs, Registro* Area, int Esq, int Dir, int *i, int *j, Dados *dados){
+void Particao(FILE **ArqLi, FILE **ArqEi, FILE **ArqLEs, Registro* Area, double Esq, double Dir, double *i, double *j, Dados *dados){
     int NRArea = 0;
-    int Li = Esq;
-    int Ls = Dir;
-    int Ei = Esq;
-    int Es = Dir;
+    double Li = Esq;
+    double Ls = Dir;
+    double Ei = Esq;
+    double Es = Dir;
     int Linf = INT_MIN;
     int Lsup = INT_MAX;
 
     bool OndeLer = true;
     Registro UltLido, R;
 
-    fseek(*ArqLi, (Li - 1) * sizeof(Registro), SEEK_SET);
-    fseek(*ArqEi, (Ei - 1) * sizeof(Registro), SEEK_SET);
+    fseek(*ArqLi, (long)((Li - 1) * sizeof(Registro)), SEEK_SET);
+    fseek(*ArqEi, (long)((Ei - 1) * sizeof(Registro)), SEEK_SET);
     *i = Esq - 1;
     *j = Dir + 1;
 

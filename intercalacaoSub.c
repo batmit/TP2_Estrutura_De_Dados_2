@@ -94,10 +94,12 @@ int geraBlocosSubstituicao(FILE* arquivo, int quantidade, Dados *dados) {
     ChamarCriadorFitas();
 
     Item itens[TAM_MEMORIA];
+    memset(itens, 0, sizeof(itens));
     int tamHeap = 0;
     char nomeArquivo[100];
 
     Registro curinga;
+    memset(&curinga, 0, sizeof(curinga));
     curinga.numero = -1;
     curinga.nota = -1;
     curinga.cidade[0] = '\0';
@@ -106,6 +108,7 @@ int geraBlocosSubstituicao(FILE* arquivo, int quantidade, Dados *dados) {
 
     int contador = 0;
     Item novoItem;
+    memset(&novoItem, 0, sizeof(novoItem));
 
     //Preenche a memoria totalmente
     while (tamHeap < TAM_MEMORIA && contador < quantidade && leItem(arquivo, &novoItem, dados)) {
