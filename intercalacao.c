@@ -297,48 +297,6 @@ void trimFim(char *str) {
         str[i--] = '\0';
 }
 
-int ObterNumCelOcupadas(Registro *Area) {
-    int count = 0;
-    for (int i = 0; i < TAM_MEMORIA; i++)
-        if (Area[i].numero != 0)
-            count++;
-    return count;
-}
-
-void InsereItem(Registro item, Registro *Area) {
-    int n = ObterNumCelOcupadas(Area);
-    int i = n - 1;
-    while (i >= 0 && Area[i].nota > item.nota){
-        Area[i + 1] = Area[i];
-        i--;
-    }
-    Area[i + 1] = item;
-}
-
-void RetiraPrimeiro(Registro *Area, Registro *R) {
-    int n = ObterNumCelOcupadas(Area);
-    if (n == 0) return;
-    *R = Area[0];
-    for (int i = 0; i < n - 1; i++)
-        Area[i] = Area[i + 1];
-    Area[n-1].numero = 0;
-    Area[n-1].nota = 0.0;
-    strcpy(Area[n-1].estado, "");
-    strcpy(Area[n-1].cidade, "");
-    strcpy(Area[n-1].curso, "");
-}
-
-void RetiraUltimo(Registro *Area, Registro *R) {
-    int n = ObterNumCelOcupadas(Area);
-    if (n == 0) return;
-    *R = Area[n-1];
-    Area[n-1].numero = 0;
-    Area[n-1].nota = 0.0;
-    strcpy(Area[n-1].estado, "");
-    strcpy(Area[n-1].cidade, "");
-    strcpy(Area[n-1].curso, "");
-}
-
 int geraBlocosHeap(FILE *arquivo, int quantidade, Dados *dados) {
     int blocosGerados = 0;
 

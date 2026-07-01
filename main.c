@@ -5,8 +5,6 @@
 #include "intercalacao.h"
 #include "quicksort.h"
 
-#define TAM_BUFFER_QS 262144
-
 int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> [-P]
 
     if(argc != 4 && argc != 5){
@@ -81,28 +79,12 @@ int main(int argc, char *argv[]){//pesquisa <método> <quantidade> <situação> 
             return 1;
         }
 
-        // Cria os buffers na RAM
-        char *bufLi = (char*)malloc(TAM_BUFFER_QS);
-        char *bufEi = (char*)malloc(TAM_BUFFER_QS);
-        char *bufLEs = (char*)malloc(TAM_BUFFER_QS);
-
-        if (bufLi && bufEi && bufLEs) {
-            // Associa os super buffers aos arquivos de forma totalmente em bloco (_IOFBF)
-            setvbuf(Li, bufLi, _IOFBF, TAM_BUFFER_QS);
-            setvbuf(Ei, bufEi, _IOFBF, TAM_BUFFER_QS);
-            setvbuf(LEs, bufLEs, _IOFBF, TAM_BUFFER_QS);
-        }
-
         inicio = clock();
         QuickSortExterno(&Li, &Ei, &LEs, 1, atoi(argv[2]), &dados);
         fim = clock();
         fclose(Li);
         fclose(Ei);
         fclose(LEs);
-
-        free(bufLi);
-        free(bufEi);
-        free(bufLEs);
 
         FILE* bin = fopen("PROVAO.bin", "rb");
         if(!bin){

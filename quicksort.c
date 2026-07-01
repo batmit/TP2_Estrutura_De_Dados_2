@@ -44,7 +44,7 @@ void InserirArea(Registro* Area, Registro* UltLido, int *NRArea){
         i--;
     }
     
-    // Desloca TODOS os elementos maiores de uma só vez usando o memmove
+    // Desloca todos os elementos maiores de uma vez usando o memmove
     if (i + 1 < *NRArea) {
         memmove(&Area[i + 2], &Area[i + 1], (*NRArea - (i + 1)) * sizeof(Registro));
     }
@@ -80,7 +80,7 @@ void RetiraMin(Registro* Area, Registro* R, int *NRArea){
     *R = Area[0]; // O mínimo é sempre o primeiro elemento
     (*NRArea)--; 
     
-    // Puxa TODOS os elementos restantes para a esquerda de uma só vez
+    // Puxa todos os elementos restantes para a esquerda de uma só vez
     if (*NRArea > 0) 
         memmove(&Area[0], &Area[1], (*NRArea) * sizeof(Registro));
     

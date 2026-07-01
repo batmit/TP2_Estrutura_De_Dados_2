@@ -125,7 +125,7 @@ void prepararTexto(const char* arquivo, const char* arquivoOrdenado, int quantid
         return;
     }
 
-    char nomeTemporario[256];
+    char nomeTemporario[100];
     snprintf(nomeTemporario, sizeof(nomeTemporario), "%s.tmp.bin", arquivoOrdenado);
 
     FILE *arqTmp = fopen(nomeTemporario, "wb");
